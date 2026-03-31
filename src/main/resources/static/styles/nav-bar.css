@@ -1,0 +1,241 @@
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.hide-div {
+    display: hidden;
+}
+
+.profile-panel {
+    position: fixed;
+    overflow-y: scroll;
+    transition: opacity 0.33s;
+    z-index: 50;
+    opacity: 0;
+}
+
+.brand-container {
+    margin: 5px;
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.brand-left-side {
+width: 50px;
+  height: 50px;
+  margin-left: 5px;
+  margin-right: 5px;
+    margin-top: auto;
+    margin-bottom: auto;
+
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.brand-left-side img {
+    width: 100%;
+}
+
+.brand-right-side {
+    flex-grow: 1;
+}
+
+.brand-right-side  p{
+    margin: 3px;
+}
+
+.brand-right-buttons {
+    display: flex;
+    padding: 10px;
+}
+
+.brand-right-button {
+    text-align: center;
+    flex-grow: 1;
+}
+
+.notification-counter {
+    position: absolute;
+    padding: 1px 5px;
+    border-radius: 45%;
+    font-size: x-small;
+    margin: 0;
+    right: -10px;
+}
+
+.notification-counter p {
+    margin: 0;
+}
+
+@media (max-width:641px) {
+    .bottom-bar {
+        display: flex;
+        flex-direction: row;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 50px;
+        justify-content: space-evenly;
+        padding: 5px;
+    }
+
+    .bottom-bar-holder {
+        display: flex;
+        height:100%;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+    .bottom-bar-holder img {
+        height: 100%;
+        width: 40px;
+    }
+
+
+    .top-bar {
+        height: 50px;
+    }
+
+    .logo-section {
+        display: none;
+    }
+
+    .nav-section {
+        display: none;
+    }
+
+    .icon-section {
+        display: none;
+    }
+
+    .profile-section {
+        display:none;
+    }
+
+    .profile-panel {
+        width: 100%;
+        top: 50px;
+        bottom: 50px;
+
+    }
+
+    .desktop-login {
+        display: none;
+    }
+
+    .notification-counter {
+        top: -10px;
+    }
+}
+
+@media (min-width:641px) {
+
+    .bottom-bar {
+        display: none;
+    }
+    .bottom-holder {
+        display: none;
+    }
+
+    .bottom-bar-holder {
+        display: none;
+    }
+
+    .top-bar {
+        height: 50px;
+    }
+
+    .top-bar-child {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+        height: 100%;
+
+        padding: 5px;
+    }
+
+    .logo-section {
+        height: 90%;
+        overflow-y: hidden;
+    }
+
+    .logo-section img {
+        height: 100%;
+    }
+
+    .icon-section {
+        display: flex;
+        gap: 5px;
+        width: min-content;
+    }
+
+    .nav-section {
+        display: flex;
+        list-style: none;
+        gap: 10px;
+    }
+
+    .nav-section .nav-item {
+        display:flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .nav-item img {
+        width: 20px;
+        margin-right: 2px;
+    }
+
+    .profile-section {
+        display: flex;
+        gap: 10px;
+        width: min-content;
+    }
+
+    .profile-img {
+        height: 100%;
+        min-width: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+
+    .profile-img img {
+        width: 100%;
+        height: 100%;
+    }
+
+    .profile-name {
+        display:flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .icon-holder {
+        height: 100%;
+        aspect-ratio: 1/1;
+        position: relative;
+    }
+
+    .icon-holder img {
+        width: 100%;
+        height: 100%;
+    }
+
+    .profile-panel {
+        width: 350px;
+        top: 60px;
+        right: 25px;
+        height: auto;
+
+    }
+
+    .notification-counter {
+        bottom: -10px;
+    }
+}

@@ -1,0 +1,273 @@
+.element-container {
+    border: solid black 1px;
+    border-radius: 5px;
+}
+
+@media screen and (min-width: 600px) {
+    .element-container {
+        padding: 5px;
+    }
+
+    .element-item {
+        padding: 5px;
+    }
+}
+
+.element-container-default {
+    background-color: rgb(209, 209, 209);
+    color: black;
+}
+
+.element-item {
+    margin: 5px;
+}
+
+.element-item-default {
+    background-color: white;
+    border: 1px solid white;
+}
+
+.element-item-default:hover {
+    transition: border 0.5s;
+    border: 1px solid #303030; /* Bright blue color */
+    box-shadow: 0 0 10px 3px #fff; /* Glowing effect */
+}
+
+.element-container-red {
+    background-color: rgb(255, 0, 0);
+    color: black;
+}
+
+.element-item-red {
+    background-color: #fd9595;
+    border: 1px solid #fd9595;
+}
+
+.element-item-red:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}
+
+.element-container-blue {
+    background-color: rgb(0, 171, 255);
+    color: black;
+}
+
+.element-item-blue {
+    background-color: #95d6fd;
+    border: 1px solid #95d6fd;
+}
+
+.element-item-blue:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}
+
+.element-container-green {
+    background-color: rgb(8, 223, 41);
+    color: black;
+}
+
+.element-item-green {
+    background-color: #d1ffc4;
+    border: 1px solid #d1ffc4;
+}
+
+.element-item-green:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}
+
+.element-container-yellow {
+    background-color: rgb(255, 239, 1);
+    color: black;
+}
+
+.element-item-yellow {
+    background-color: #fff3c4;
+    border: 1px solid #fff3c4;
+}
+
+.element-item-yellow:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}
+
+.element-container-orange {
+    background-color: rgb(255, 120, 1);
+    color: black;
+}
+
+.element-item-orange {
+    background-color: #ffc899;
+    border: 1px solid #ffc899;
+}
+
+.element-item-orange:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}
+
+.element-container-purple {
+    background-color: rgb(221, 99, 255);
+    color: black;
+}
+
+.element-item-purple {
+    background-color: #f0bcff;
+    border: 1px solid #f0bcff;
+}
+
+.element-item-purple:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}
+
+.element-container-pink {
+    background-color: rgb(255, 59, 243);
+    color: black;
+}
+
+.element-item-pink {
+    background-color: #ffcaf4;
+    border: 1px solid #ffcaf4;
+}
+
+.element-item-pink:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}
+
+.element-container-dark-default {
+    background-color: rgb(60, 60, 60);
+    color: #ddd;
+}
+
+.element-item-dark-default {
+    background-color: #777;;
+    border: 1px solid #777;;
+}
+
+.element-item-dark-default:hover {
+    transition: border 0.5s;
+    box-shadow: 0 0 10px 3px #777; /* Glowing effect */
+}
+
+.element-container-dark-red {
+    background-color: rgb(198, 23, 23);
+    color: #f5d5d5;
+}
+
+.element-item-dark-red {
+    background-color: #860c0c;
+    border: 1px solid #860c0c;
+}
+
+.element-item-dark-red:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}
+
+.element-container-dark-blue {
+    background-color: rgb(20, 2, 143);
+    color: #dad5ff;
+}
+
+.element-item-dark-blue {
+    background-color: #2008c8;
+    border: 1px solid #2008c8;
+}
+
+.element-item-dark-blue:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}
+
+.element-container-dark-green {
+    background-color: rgb(0, 96, 11);
+    color: #d5ffde;
+}
+
+.element-item-dark-green {
+    background-color: #1f9906;
+    border: 1px solid #1f9906;
+}
+
+.element-item-dark-green:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}
+
+.element-container-dark-yellow {
+    background-color: rgb(170, 154, 25);
+    color: #6a6400;
+}
+
+.element-item-dark-yellow {
+    background-color: #fbeb00;
+    border: 1px solid #fbeb00;
+}
+
+.element-item-dark-yellow:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}
+
+.element-container-dark-orange {
+    background-color: rgb(183, 79, 4);
+    color: #ffe7c9;
+}
+
+.element-item-dark-orange {
+    background-color: #d97205;
+    border: 1px solid #d97205;
+}
+
+.element-item-dark-orange:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}
+
+.element-container-dark-purple {
+    background-color: rgb(80, 0, 102);
+    color: #f7c0ff;
+}
+
+.element-item-dark-purple {
+    background-color: #74029d;
+    border: 1px solid #74029d;
+}
+
+.element-item-dark-purple:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}
+
+.element-container-dark-pink {
+    background-color: rgb(228, 0, 181);
+    color: #fbdeff;
+}
+
+.element-item-dark-pink {
+    background-color: #ac00a1;
+    border: 1px solid #ac00a1;
+}
+
+.element-item-dark-pink:hover {
+    transition: border 0.5s;
+    border: 1px double #fff;
+    box-shadow: 0 0 10px 3px #fff;
+}

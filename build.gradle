@@ -49,6 +49,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-quartz"
     implementation "org.springframework.boot:spring-boot-starter-data-mongodb-reactive"
     implementation "org.springframework.boot:spring-boot-starter-aspectj"
+    implementation "org.springframework.boot:spring-boot-starter-thymeleaf"
 
     // Azure Logging
     implementation "com.microsoft.azure:applicationinsights-runtime-attach:3.7.6"
