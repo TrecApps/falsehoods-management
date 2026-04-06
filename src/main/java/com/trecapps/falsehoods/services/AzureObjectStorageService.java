@@ -9,10 +9,13 @@ import com.azure.storage.blob.BlobServiceAsyncClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.trecapps.falsehoods.models.BrandContent;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@Slf4j
 public class AzureObjectStorageService implements IObjectStorageService {
 
     BlobServiceAsyncClient client;
@@ -69,6 +72,21 @@ public class AzureObjectStorageService implements IObjectStorageService {
 
                     return blobAsyncClient.downloadContent()
                             .map((BinaryData data) -> new String(data.toBytes()));
+                });
+    }
+
+    @Override
+    public Mono<BrandContent> retrieveBrandContent(UUID id) {
+        BlobAsyncClient blobAsyncClient = this.containerClient.getBlobAsyncClient(String.format("%s-brand-content.json", id));
+
+        return blobAsyncClient.exists()
+                .flatMap((Boolean exists) -> {
+                    if(!exists){
+                        log.warn("Contents for brand {} not found!", id);
+                        return Mono.empty();
+                    }
+                    return blobAsyncClient.downloadContent()
+                            .map((BinaryData data) -> data.toObject(BrandContent.class));
                 });
     }
 }

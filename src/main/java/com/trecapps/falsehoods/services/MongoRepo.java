@@ -17,9 +17,11 @@ import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class MongoRepo {
@@ -74,5 +76,9 @@ public class MongoRepo {
         Aggregation aggregation = Aggregation.newAggregation(matchOperation, limitOperation);
 
         return this.template.aggregate(aggregation, this.brandsCollection, Brand.class);
+    }
+
+    Mono<Brand> retrieveBrand(UUID uuid){
+        return this.template.findById(uuid, Brand.class, this.brandsCollection);
     }
 }
