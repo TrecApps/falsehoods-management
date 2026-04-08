@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<body>
+
+<div th:fragment="bar">
+<div
+
+        class="top-bar element-container"
+        style="zIndex:35"
+        th:classappend="${elementContainerSetting}"
+>
+    <div class="top-bar-child">
+        <div class="logo-section">
+            <img th:src="@{/images/Falsehood-icon-Desktop.png}">
+        </div>
+
+
+        <div class="nav-section">
+
+            <li
+                    class="nav-item"
+                    style="padding-left:5px;"
+            >
+                <img th:src="@{/images/Welcome-icon.png}">
+                <a class="nav-link" href="/Welcome">Welcome</a>
+            </li>
+            <li
+                    class="nav-item"
+                    style="padding-left:5px;"
+            >
+                <img th:src="@{/images/Falsehood-icon-mob.png}">
+                <a class="nav-link">Falsehoods</a>
+            </li>
+            <li
+                    class="nav-item"
+                    style="padding-left:5px;"
+            >
+<!--                <img th:src="@{/images/Factcheck-logo-mob.png}">-->
+<!--                <a class="nav-link" >Factchecks</a>-->
+            </li>
+
+        </div>
+
+<!--        <div style="padding: 5px;">-->
+<!--            <ng-content></ng-content>-->
+<!--        </div>-->
+
+<!--        <div class="icon-section">-->
+<!--            @for (navOption of navOptions | navPipe:OPTION_DESKTOP:OPTION_DESK_NO_MOB; track navOption) {-->
+<!--            <div class="icon-holder"  [ngClass]="iconClass"-->
+<!--                 (click)="onIconClick(navOption)"-->
+<!--                 (mouseenter)="onIconHover(navOption, true)"-->
+<!--                 (mouseleave)="onIconHover(navOption, false)"-->
+<!--            >-->
+<!--                @if(navOption.notifyCount){-->
+<!--                <div class="notification-counter" appElementItem>-->
+<!--                    <p>{{ navOption.notifyCount }}</p>-->
+<!--                </div>-->
+<!--                }-->
+<!--                <img [src]="getImage(navOption)">-->
+<!--            </div>-->
+<!--            }-->
+<!--        </div>-->
+
+        <div
+            th:if="${list != null}"
+            class="profile-section"
+        >
+            <div class="profile-img">
+                <img th:src="${profilePic}">
+            </div>
+            <div class="profile-name" th:text="${list.getMainAccount().getDisplayName}">
+
+            </div>
+        </div>
+
+
+        <a
+            th:if="${list == null}"
+            th:href="@{/Login}"
+        >
+            <button class="btn btn-primary desktop-login">Log in</button>
+        </a>
+
+
+    </div>
+
+<!--    @if (authService.hasActiveTokens() && items.length) {-->
+<!--    <div #profilePanel-->
+<!--         class="profile-panel"-->
+<!--         appElementContainer-->
+<!--         hidden-->
+<!--    >-->
+<!--        @for (itemGroup of items; track itemGroup; let i = $index) {-->
+<!--        <div-->
+<!--        >-->
+<!--            @if (i != 0) {-->
+<!--            <hr>-->
+<!--            }-->
+<!--            @for (item of itemGroup.itemList | navProfile; track item) {-->
+<!--            <div-->
+<!--                    appElementItem-->
+<!--                    (click)="onProfileItemClicked.emit(item.item)"-->
+<!--            >-->
+<!--                <p>{{ item.displayItem }}</p>-->
+<!--            </div>-->
+<!--            }-->
+<!--        </div>-->
+<!--        }-->
+<!--    </div>-->
+<!--    }-->
+
+<!--    @if (authService.ownedAccounts?.length) {-->
+<!--    <div #brandPanel-->
+<!--         class="profile-panel"-->
+<!--         appElementContainer-->
+<!--         hidden-->
+<!--    >-->
+<!--        @for (brand of authService.ownedAccounts; track brand) {-->
+<!--        <div appElementItem class="brand-container">-->
+<!--            <div class="brand-left-side">-->
+<!--                <img [src]="basicImageUrl + formatBrandId(brand.id || '')" (error)="imageError($event)">-->
+<!--            </div>-->
+<!--            <div class="brand-right-side">-->
+<!--                <p style="text-align: center;">{{ brand.name }}</p>-->
+<!--                <div class="brand-right-buttons">-->
+<!--                    <div class="brand-right-button" appElementItem>-->
+<!--                        <a [href]="baseUserUrl + '/brands'" target="_blank">-->
+<!--                            <div style="border: 1px rgba(128, 128, 128, 0.4) solid;" >-->
+<!--                                View Brand-->
+<!--                            </div>-->
+<!--                        </a>-->
+<!--                    </div>-->
+<!--                    <div class="brand-right-button" appElementItem >-->
+<!--                        <div style="border: 1px rgba(128, 128, 128, 0.4) solid;" (click)="loginAsBrand(brand.id)">-->
+<!--                            {{ authService.tcBrand?.id == brand.id ? 'Active Brand' : 'Assume Brand'}}-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        }-->
+<!--    </div>-->
+<!--    }-->
+
+</div>
+
+
+<div
+        class="bottom-bar element-container" style="zIndex:35" th:classappend="${elementContainerSetting}">
+
+    <div class="bottom-bar-holder">
+        <img th:src="@{/images/Welcome-icon.png}">
+    </div>
+    <div class="bottom-bar-holder">
+        <img th:src="@{/images/Falsehood-icon-mob.png}">
+    </div>
+    <div class="bottom-bar-holder">
+        <img th:src="@{/images/Factcheck-logo-mob.png}">
+    </div>
+
+
+    <div
+            th:if="${user != null}"
+            class="bottom-bar-holder"
+            style="border-radius: 50%; overflow: hidden;"
+    >
+        <img th:src="${profilePic}">
+<!--        <div [ngClass]="divLineClass"></div>-->
+    </div>
+
+
+    <div
+            th:if="${user == null}"
+            class="bottom-bar-holder"
+    >
+        <img th:src="@{/images/non-profile-mob.png}" alt="Login">
+    </div>
+</div>
+</div>
+
+</body>
+</html>

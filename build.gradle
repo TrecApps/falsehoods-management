@@ -36,6 +36,8 @@ dependencies {
     implementation 'org.projectlombok:lombok:1.18.42'
     annotationProcessor 'org.projectlombok:lombok:1.18.42'
 
+    implementation 'net.coobird:thumbnailator:0.4.21'
+
     // Basic Security help
     implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-azure', version: '0.0.41')
     implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-core', version: '0.0.41')

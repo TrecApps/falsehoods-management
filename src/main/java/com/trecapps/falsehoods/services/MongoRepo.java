@@ -81,4 +81,9 @@ public class MongoRepo {
     Mono<Brand> retrieveBrand(UUID uuid){
         return this.template.findById(uuid, Brand.class, this.brandsCollection);
     }
+
+    Mono<Brand> saveBrand(Brand brand){
+        return this.template.save(brand, this.brandsCollection);
+    }
+
 }

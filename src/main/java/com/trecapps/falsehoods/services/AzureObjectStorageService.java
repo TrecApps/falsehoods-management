@@ -89,4 +89,26 @@ public class AzureObjectStorageService implements IObjectStorageService {
                             .map((BinaryData data) -> data.toObject(BrandContent.class));
                 });
     }
+
+    @Override
+    public Mono<BrandContent> saveBrandContent(UUID id, BrandContent content) {
+
+        BlobAsyncClient contentClient = this.containerClient.getBlobAsyncClient(String.format("%s-brand-content.json", id));
+        BlobAsyncClient thumbnailClient = this.containerClient.getBlobAsyncClient(String.format("%s-thumbnail", id));
+
+        String imageData = content.getImageData();
+
+        String thumbnailData = imageData == null ? null :
+                this.generateThumbnail(imageData, 150, 150);
+
+        return contentClient.upload(BinaryData.fromObject(content))
+                .thenReturn(content)
+                .flatMap((BrandContent content1) -> {
+                    if(thumbnailData == null)
+                        return Mono.just(content1);
+                    return thumbnailClient.upload(BinaryData.fromString(thumbnailData)).thenReturn(content1);
+                });
+
+
+    }
 }

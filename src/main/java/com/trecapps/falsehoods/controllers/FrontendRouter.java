@@ -1,11 +1,14 @@
 package com.trecapps.falsehoods.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.trecapps.falsehoods.models.BrandComplete;
+import com.trecapps.falsehoods.services.BrandService;
 import com.trecapps.falsehoods.services.WelcomeService;
 import com.trecauth.common.model.AccountList;
 import com.trecauth.common.model.TrecauthAuthentication;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
@@ -16,12 +19,19 @@ import reactor.core.publisher.Mono;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class FrontendRouter {
 
     @Autowired
     WelcomeService welcomeService;
+
+    @Autowired
+    BrandService brandService;
+
+    @Value("${trecapps.image.url}")
+    String imageUrl;
 
     @Data
     static
@@ -41,6 +51,77 @@ public class FrontendRouter {
                 });
     }
 
+    String getPathVariable(String name, ServerRequest request){
+        try{
+            return request.pathVariable(name);
+        } catch(IllegalArgumentException ignore){
+            return null;
+        }
+    }
+
+    void prepStyles(Map<String, Object> dataMap, AccountList list){
+        String elementStyle = "element-container-default";
+
+        // ToDo - get details of styles
+
+        // End ToDo
+
+        dataMap.put("elementContainerSetting", elementStyle);
+        dataMap.put("elementItemSetting", elementStyle.replace("container", "item"));
+    }
+
+    Map<String, Object> getDataMap(FrontendData<?> data){
+        Map<String, Object> dataMap = new HashMap<>();
+        AccountList list = data.getAccountList();
+        dataMap.put("list", list);
+        if(list != null){
+            String profilePic = String.format("%s/profile/%s", this.imageUrl, list.getMainAccount().getId());
+            dataMap.put("profilePic", profilePic);
+        }
+
+        prepStyles(dataMap, list);
+        return dataMap;
+    }
+
+    public Mono<ServerResponse> articlePage(ServerRequest request) {
+        String id = getPathVariable("id", request);
+        if(id == null){
+            return ServerResponse.badRequest().bodyValue("'id' is a required path variable!");
+
+        }
+        Mono<FrontendData<BrandComplete>> thData = this.prepareData();
+        thData = thData.flatMap((FrontendData<BrandComplete> frontendData) -> {
+            boolean hasAccess = false;
+            // ToDo - determine if requester has access
+
+            //
+            return brandService.retrieveBrand(hasAccess, UUID.fromString(id))
+                    .map((BrandComplete complete) -> {
+                        frontendData.setData(complete);
+                        return frontendData;
+                    });
+        });
+
+        return thData.flatMap((FrontendData<BrandComplete> data) -> {
+            Map<String, Object> dataMap = getDataMap(data);
+
+            BrandComplete complete = data.getData();
+
+            boolean isResourceEmployee = false;
+            // ToDo - determine if requester has access
+
+            dataMap.put("reviewStage", complete.getMetadata().getReviewStage());
+            dataMap.put("isResourceEmployee", isResourceEmployee);
+            dataMap.put("brandPic", complete.getContent().getImageData());
+            dataMap.put("imgDesc", complete.getContent().getImageDescription());
+            dataMap.put("entries", complete.getContent().getMetaDataAsEntries());
+            dataMap.put("brandContent", complete.getContent().getContent());
+            dataMap.put("brandId", id);
+
+            return ServerResponse.ok().render("Article", dataMap);
+        });
+    }
+
     public Mono<ServerResponse> welcomePage(ServerRequest request) {
         Mono<FrontendData<List<WelcomeService.Guideline>>> thData = this.prepareData();
         thData = thData.doOnNext((FrontendData<List<WelcomeService.Guideline>> frontendData) -> {
@@ -49,18 +130,9 @@ public class FrontendRouter {
 
         return thData.flatMap((FrontendData<List<WelcomeService.Guideline>> data) -> {
 
-            String elementStyle = "element-container-default";
+            Map<String, Object> dataMap = getDataMap(data);
 
-//            String profilePic = user == null ? null :
-//                    brands == null ? "User-" + user.getId() : "Brand-" + brands.getId();
-
-            Map<String, Object> dataMap = new HashMap<>();
-//            dataMap.put("user", data.getUser());
-//            dataMap.put("brand", data.getBrand());
-//            dataMap.put("profilePic", String.format("%s/%s", this.imageUrl, profilePic));
             dataMap.put("guidelines", data.getData());
-            dataMap.put("elementContainerSetting", elementStyle);
-            dataMap.put("elementItemSetting", elementStyle.replace("container", "item"));
 
             return ServerResponse.ok().render("Welcome", dataMap);
 
