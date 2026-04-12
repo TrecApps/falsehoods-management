@@ -39,9 +39,9 @@ dependencies {
     implementation 'net.coobird:thumbnailator:0.4.21'
 
     // Basic Security help
-    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-azure', version: '0.0.41')
-    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-core', version: '0.0.41')
-    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-mongo', version: '0.0.41')
+    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-azure', version: '0.0.42')
+    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-core', version: '0.0.42')
+    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-mongo', version: '0.0.42')
 
     // Security Dependencies
     implementation "org.springframework.boot:spring-boot-starter-security"
