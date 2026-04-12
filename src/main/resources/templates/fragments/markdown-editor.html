@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+  Fragment: markdownEditor(editorId, initialContent)
+
+  JS ID conventions (markdown-editor.js):
+    wire(suffix)  → getElementById(editorId + '-btn-' + suffix)   click listener
+    imgEl(name)   → getElementById(editorId + '-btn-' + name)     .src swap
+    Both resolve to the same element, so IDs are on <img> tags (which have .src).
+
+  _readInsertFields() reads these IDs regardless of mode:
+    editorId + '-input-resource-link'   URL / image address / link URL
+    editorId + '-input-display-text'    caption (picture) or display text (link)
+    editorId + '-input-backup-text'     alt text (picture only)
+    editorId + '-input-go-to-link'      browser link (picture only)
+    editorId + '-input-rows'            rows (table only)
+    editorId + '-input-cols'            cols (table only)
+
+  The shared inputs (resource-link, display-text) are rendered once inside the
+  insert panel and are always present in the DOM; the mode sub-sections show/hide
+  the mode-specific fields and submit buttons.
+-->
+
+<div th:fragment="markdownEditor(editorId, initialContent)"
+     th:id="${editorId + '-editor'}"
+     class="md-editor">
+
+  <!-- Stylesheet and scripts -->
+  <link rel="stylesheet" href="/styles/markdown-editor.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="/js/markdown-editor.js"></script>
+
+  <!-- Toolbar -->
+  <div class="md-toolbar">
+    <div class="md-toolbar-button">
+      <img th:id="${editorId + '-btn-bold'}"    src="/md-images/reg-Bold.png"    alt="Bold" /></div>
+    <div class="md-toolbar-button">
+      <img th:id="${editorId + '-btn-italic'}"  src="/md-images/reg-Italic.png"  alt="Italic" /></div>
+    <div class="md-toolbar-button"></div>
+    <div class="md-toolbar-button">
+      <img th:id="${editorId + '-btn-strike'}"  src="/md-images/reg-Strike.png"  alt="Strike" /></div>
+    <div class="md-toolbar-button">
+      <img th:id="${editorId + '-btn-code'}"    src="/md-images/reg-Code.png"    alt="Code" /></div>
+    <div class="md-toolbar-button">
+      <img th:id="${editorId + '-btn-h1'}"      src="/md-images/reg-H1.png"      alt="H1" /></div>
+    <div class="md-toolbar-button">
+      <img th:id="${editorId + '-btn-h2'}"      src="/md-images/reg-H2.png"      alt="H2" /></div>
+    <div class="md-toolbar-button">
+      <img th:id="${editorId + '-btn-h3'}"      src="/md-images/reg-H3.png"      alt="H3" /></div>
+    <div class="md-toolbar-button">
+      <img th:id="${editorId + '-btn-h4'}"      src="/md-images/reg-H4.png"      alt="H4" /></div>
+    <div class="md-toolbar-button">
+      <img th:id="${editorId + '-btn-h5'}"      src="/md-images/reg-H5.png"      alt="H5" /></div>
+    <div class="md-toolbar-button">
+      <img th:id="${editorId + '-btn-h6'}"      src="/md-images/reg-H6.png"      alt="H6" /></div>
+    <div class="md-toolbar-button"></div>
+    <div class="md-toolbar-button">
+      <img th:id="${editorId + '-btn-picture'}" src="/md-images/reg-Picture.png" alt="Picture" /></div>
+    <div class="md-toolbar-button">
+      <img th:id="${editorId + '-btn-link'}"    src="/md-images/reg-Link.png"    alt="Link" /></div>
+    <div class="md-toolbar-button">
+      <img th:id="${editorId + '-btn-table'}"   src="/md-images/reg-Table.png"   alt="Table" /></div>
+  </div>
+
+  <!-- Editor and preview panels -->
+  <div style="display:flex; flex-wrap:wrap;">
+    <div th:id="${editorId + '-editor-side'}" class="md-editor-side">
+      <textarea th:id="${editorId + '-textarea'}" class="form-control" style="height: 90%"></textarea>
+    </div>
+    <div th:id="${editorId + '-preview-side'}" class="md-preview-side">
+      <div th:id="${editorId + '-preview'}" class="md-preview"></div>
+    </div>
+  </div>
+
+  <!-- Insert panel (hidden by default; JS shows/hides sub-sections by mode) -->
+  <div th:id="${editorId + '-insert-panel'}" class="md-insert-panel" style="display:none;">
+
+    <!-- Shared inputs — always present; used by picture (mode 1) and link (mode 2) -->
+    <div>
+      <label>URL:
+        <input type="text" th:id="${editorId + '-input-resource-link'}" placeholder="https://..." />
+      </label>
+      <label>Caption / Display Text:
+        <input type="text" th:id="${editorId + '-input-display-text'}" placeholder="Text" />
+      </label>
+    </div>
+
+    <!-- Picture mode (mode 1) — extra fields for alt text and browser link -->
+    <div th:id="${editorId + '-insert-picture'}" style="display:none;">
+      <h4>Insert Image</h4>
+      <label>Alternative Text:
+        <input type="text" th:id="${editorId + '-input-backup-text'}" placeholder="Alt text" />
+      </label>
+      <label>Browser Link (optional):
+        <input type="text" th:id="${editorId + '-input-go-to-link'}" placeholder="https://..." />
+      </label>
+      <button type="button" th:id="${editorId + '-submit-image'}">Add Image</button>
+    </div>
+
+    <!-- Link mode (mode 2) — uses shared resource-link and display-text inputs -->
+    <div th:id="${editorId + '-insert-link'}" style="display:none;">
+      <h4>Insert Link</h4>
+      <button type="button" th:id="${editorId + '-submit-link'}">Add Link</button>
+    </div>
+
+    <!-- Table mode (mode 3) -->
+    <div th:id="${editorId + '-insert-table'}" style="display:none;">
+      <h4>Insert Table</h4>
+      <label>Rows:
+        <input type="number" th:id="${editorId + '-input-rows'}" value="2" min="1" />
+      </label>
+      <label>Columns:
+        <input type="number" th:id="${editorId + '-input-cols'}" value="2" min="1" />
+      </label>
+      <button type="button" th:id="${editorId + '-submit-table'}">Add Table</button>
+    </div>
+
+    <!-- Cancel — wired by JS as editorId + '-btn-cancel' -->
+    <button type="button" th:id="${editorId + '-btn-cancel'}">Cancel</button>
+
+  </div>
+
+  <!-- Initialise editor -->
+  <script th:inline="javascript">
+    initMarkdownEditor([[${editorId}]], [[${initialContent}]]);
+  </script>
+
+</div>
+
+</body>
+</html>
