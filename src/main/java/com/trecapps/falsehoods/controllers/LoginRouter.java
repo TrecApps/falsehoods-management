@@ -16,6 +16,8 @@ public class LoginRouter {
     String loginUrl;
     @Value("${trecapps.falsehoods.url}")
     String falsehoodsUrl;
+    @Value("${trecapps.falsehoods.base-path}")
+    String falsehoodsPath;
 
 
 
@@ -24,6 +26,7 @@ public class LoginRouter {
 
         dataMap.put("userServiceUrl", loginUrl);
         dataMap.put("gatewayPath", falsehoodsUrl);
+        dataMap.put("baseUrl", falsehoodsPath);
 
         return ServerResponse.ok().render("Login", dataMap);
     }

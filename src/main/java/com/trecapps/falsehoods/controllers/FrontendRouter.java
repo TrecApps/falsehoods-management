@@ -37,6 +37,8 @@ public class FrontendRouter {
     String imageUrl;
     @Value("${trecapps.falsehoods.url}")
     String falsehoodsUrl;
+    @Value("${trecapps.falsehoods.base-path}")
+    String falsehoodsPath;
 
     @Data
     static
@@ -81,6 +83,7 @@ public class FrontendRouter {
         dataMap.put("list", list);
         dataMap.put("imageServiceUrl", imageUrl);
         dataMap.put("falsehoodServiceUrl", falsehoodsUrl);
+        dataMap.put("baseUrl", falsehoodsPath);
         if(list != null){
             String profilePic = String.format("%s/profile/%s", this.imageUrl, list.getMainAccount().getId());
             dataMap.put("profilePic", profilePic);

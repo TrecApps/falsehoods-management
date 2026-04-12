@@ -4,6 +4,7 @@
       lang="en">
 
     <head>
+        <base th:href="${baseUrl}" />
         <meta charset="UTF-8">
         <title>Login - Falsehoods Tracker</title>
         <link
@@ -12,9 +13,9 @@
                 integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
                 crossorigin="anonymous">
 
-        <link th:href="@{/styles/falsehood-styles.css}" rel="stylesheet" />
-        <link th:href="@{/styles/login.css}" rel="stylesheet" />
-        <link th:href="@{/styles/tc-styles.css}" rel="stylesheet" />
+        <link href="styles/falsehood-styles.css" rel="stylesheet" />
+        <link href="styles/login.css" rel="stylesheet" />
+        <link href="styles/tc-styles.css" rel="stylesheet" />
     </head>
 
     <body>
@@ -24,10 +25,10 @@
                 <div class="section-on-desktop">
                     <h1 style="color:#ff1d58">TrecAccount Login</h1>
                     <div id="logoContainer" class="containGlobal">
-                        <img class="LoginImage fadeInRight" th:src="@{/images/icons/outline.png}">
+                        <img class="LoginImage fadeInRight" src="images/icons/outline.png">
                         <div class="clearfix"></div>
-                        <img class="LoginImage-ref-2 fadeInLeftRef" id="Globe1" th:src="@{/images/icons/glob-2.png}">
-                        <img id="Globe2" class="LoginImage-ref fadeInRightRef" th:src="@{/images/icons/world-1.png}">
+                        <img class="LoginImage-ref-2 fadeInLeftRef" id="Globe1" src="images/icons/glob-2.png">
+                        <img id="Globe2" class="LoginImage-ref fadeInRightRef" src="images/icons/world-1.png">
                     </div>
                 </div>
             </div>
@@ -37,9 +38,9 @@
 
                 <div class="form-group" id="username-form">
                     <label class="form-label" id="username-label" for="username-input">Username</label>
-                    <input class="form-control" id="username-input" oninput="setUsername(e)">
+                    <input class="form-control" id="username-input">
                     <br>
-                    <button class="btn btn-primary" id="username-submit" disabled onclick="submitUsername()">Submit</button>
+                    <button class="btn btn-primary" id="username-submit" disabled>Submit</button>
                     <a class="btn btn-info" th:href="${createAccountUrl}" target="_blank">Create Account</a>
                 </div>
 
@@ -54,9 +55,9 @@
                 <div hidden class="element-container element-container-default" id="method-submit-form">
                     <div class="form-group">
                         <label class="form-check-label" for="noExpire" id="noExpireLabel">Stay Logged In (Not recommended on Public Devices)</label><br>
-                        <input class="form-check-input" type="checkbox" id="noExpire" onchange="onStayLoggedIn(e)" style="margin-left: 0;">
+                        <input class="form-check-input" type="checkbox" id="noExpire" style="margin-left: 0;">
                         <br>
-                        <button class="btn btn-primary" id="submit-auth-button" onclick="submitLogin()">Login</button>
+                        <button class="btn btn-primary" id="submit-auth-button">Login</button>
                     </div>
                 </div>
 
@@ -70,13 +71,14 @@
 
             let authMethods = [];
 
-            let userServiceUrl = [[${userServiceUrl}]]
+            let userServiceUrl = "[[${userServiceUrl}]]"
 
             let stayLoggedIn = false;
 
             function setUsername(e){
                 username = e.target.value;
-                document.getElementById('username-submit').disabled = !makingCall && username.trim().length > 5;
+                let makingDisabled = !makingCall && username.trim().length > 5;
+                document.getElementById('username-submit').disabled = !makingDisabled;
             }
 
             function transferToPage() {
@@ -85,7 +87,7 @@
 
                 let targetEndpoint = "/Welcome";
 
-                let gatewayPath = [[${gatewayPath}]];
+                let gatewayPath = "[[${gatewayPath}]]";
 
                 let target = urlParams.get("target");
 
@@ -98,7 +100,7 @@
                 }
 
 
-                document.location.href = `${location.host}${gatewayPath}${targetEndpoint}`
+                document.location.href = `${gatewayPath}${targetEndpoint}`
             }
 
             function checkLoginReady() {
@@ -120,8 +122,10 @@
                 if(makingCall) return;
                 makingCall = false;
                 let useMethods = authMethods.filter((am) => am.selected).map((am) => {
-                    name: am.name,
-                    code: am.code
+                    return {
+                        name: am.name,
+                        code: am.code
+                    }
                 });
 
                 fetch(`${userServiceUrl}/Login`, {
@@ -238,8 +242,8 @@
                                 resetForm();
                             }, 100)
                         });
-                        mechHolder.innerHtml = `<p><b>Method: </b>${ authMethod.name }</p>
-                                                <p><i>Type: </i>{{ authMethod.type }}</p>`;
+                        mechHolder.innerHTML = `<p><b>Method: </b>${ authMethod.name }</p>
+                                                <p><i>Type: </i>${ authMethod.type }</p>`;
 
                         preList.appendChild(mechHolder);
 
@@ -255,20 +259,34 @@
                 makingCall = true;
 
                 fetch(`${userServiceUrl}/Login/username/${username}`).then(async (response) => {
-                    authMethods = await response.json().map((entry) => {
-                        ...entry,
-                        code: "",
-                        selected: false
+                    let authMethodsJson = await response.json();
+                    authMethods = authMethodsJson.map((entry) => {
+                        return {
+                            ...entry,
+                            code: "",
+                            selected: false
+                        }
                     });
 
                     document.getElementById("error-message").hidden = true;
+                    console.log("Auth methods are: ", authMethods);
 
                     makingCall = false;
-                }).catch(() => {
+                    resetForm();
+                }).catch((e) => {
+                console.log("Error detected in submit username call", e);
                     document.getElementById("error-message").hidden = false;
                     makingCall = false;
                 });
             }
+
+            document.addEventListener('DOMContentLoaded', (event) => {
+                console.log("Running initialization");
+                document.getElementById("username-input").addEventListener("input", setUsername);
+                document.getElementById("username-submit").addEventListener("click", submitUsername);
+                document.getElementById("noExpire").addEventListener("change", onStayLoggedIn);
+                document.getElementById("submit-auth-button").addEventListener("click", submitLogin);
+            });
         </script>
 
     </body>
