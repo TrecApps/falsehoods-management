@@ -1,7 +1,10 @@
 package com.trecapps.falsehoods.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.trecapps.falsehoods.models.Brand;
 import com.trecapps.falsehoods.models.BrandComplete;
+import com.trecapps.falsehoods.models.BrandContent;
+import com.trecapps.falsehoods.models.ReviewStage;
 import com.trecapps.falsehoods.services.BrandService;
 import com.trecapps.falsehoods.services.WelcomeService;
 import com.trecauth.common.model.AccountList;
@@ -32,6 +35,8 @@ public class FrontendRouter {
 
     @Value("${trecapps.image.url}")
     String imageUrl;
+    @Value("${trecapps.falsehoods.url}")
+    String falsehoodsUrl;
 
     @Data
     static
@@ -74,6 +79,8 @@ public class FrontendRouter {
         Map<String, Object> dataMap = new HashMap<>();
         AccountList list = data.getAccountList();
         dataMap.put("list", list);
+        dataMap.put("imageServiceUrl", imageUrl);
+        dataMap.put("falsehoodServiceUrl", falsehoodsUrl);
         if(list != null){
             String profilePic = String.format("%s/profile/%s", this.imageUrl, list.getMainAccount().getId());
             dataMap.put("profilePic", profilePic);
@@ -81,6 +88,59 @@ public class FrontendRouter {
 
         prepStyles(dataMap, list);
         return dataMap;
+    }
+
+    private BrandComplete generateBlankBrandComplete(){
+        BrandComplete ret = new BrandComplete();
+
+        Brand brand = new Brand();
+        brand.setDefaultLanguage("en-us");
+        brand.setReviewStage(ReviewStage.PRE_SUBMIT);
+        ret.setMetadata(brand);
+
+        BrandContent content = new BrandContent();
+        content.setContent("");
+        content.setImageDescription("");
+        content.setMetadata(new HashMap<>());
+        ret.setContent(content);
+
+        return ret;
+    }
+
+    public Mono<ServerResponse> articleEditPage(ServerRequest request){
+        Mono<FrontendData<BrandComplete>> thData = this.prepareData();
+
+        thData = thData.flatMap((FrontendData<BrandComplete> frontendData) -> {
+            String id = getPathVariable("id", request);
+
+            Mono<BrandComplete> completeMono;
+
+            if(id == null){
+                completeMono = Mono.just(generateBlankBrandComplete());
+            } else {
+                completeMono = this.brandService.retrieveBrand(true, UUID.fromString(id));
+            }
+
+            return completeMono.map((BrandComplete bc) -> {
+                frontendData.setData(bc);
+                return frontendData;
+            });
+        });
+
+
+        return thData.flatMap((FrontendData<BrandComplete> data) -> {
+            Map<String, Object> dataMap = getDataMap(data);
+
+            BrandComplete complete = data.getData();
+
+            dataMap.put("brandContent", complete.getContent());
+            dataMap.put("metadata", complete.getMetadata());
+
+            return ServerResponse.ok().render("ArticleEdit", dataMap);
+        });
+
+
+
     }
 
     public Mono<ServerResponse> articlePage(ServerRequest request) {

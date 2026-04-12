@@ -22,13 +22,19 @@ public class RouteConfig implements WebFluxConfigurer
     private FrontendRouter frontendRouter;
 
     @Autowired
+    private LoginRouter loginRouter;
+
+    @Autowired
     private ApplicationContext applicationContext;
 
     @Bean
     public RouterFunction<ServerResponse> route() {
         return RouterFunctions.route()
                 .GET("/Welcome",frontendRouter::welcomePage)
-                //.GET("/Login", frontendRouter::loginPage)
+                .GET("/Login", loginRouter::loginPage)
+                .GET("/Article/{id}", frontendRouter::articlePage)
+                .GET("/ArticleEdit", frontendRouter::articleEditPage)
+                .GET("/ArticleEdit/{id}", frontendRouter::articleEditPage)
                 .build();
     }
 
