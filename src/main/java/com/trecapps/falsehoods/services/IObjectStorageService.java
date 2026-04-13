@@ -1,6 +1,7 @@
 package com.trecapps.falsehoods.services;
 
 import com.trecapps.falsehoods.models.BrandContent;
+import com.trecapps.falsehoods.models.ContentVersion;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.SortedSet;
 import java.util.UUID;
 
 @Service
@@ -41,9 +43,17 @@ public interface IObjectStorageService {
         }
     }
 
+    default String getFalsehoodId(UUID id){
+        return String.format("Falsehood-%s.json", id);
+    }
+
     Mono<String> retrieveThumbnail(UUID id);
 
     Mono<BrandContent> retrieveBrandContent(UUID id);
 
     Mono<BrandContent> saveBrandContent(UUID id, BrandContent content);
+
+    Mono<SortedSet<ContentVersion>> persistFalsehoodContent(UUID id, String content);
+
+    Mono<SortedSet<ContentVersion>> getFalsehoodContent(UUID id);
 }

@@ -1,9 +1,7 @@
 package com.trecapps.falsehoods.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.trecauth.common.model.Resource;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
@@ -13,30 +11,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * The main Falsehood Class to persist into the Mongo Database
- */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class FalsehoodDocument extends Resource {
-
+public class FalsehoodRet {
     /**
      * The main ID of the Falsehood
      */
-    @MongoId
     UUID id;
     /**
      * The User-geared Account of the submitter
      */
-    @Indexed
-    @Field("_creator")
     UUID creator;
 
     /**
      * The User-geared Account if the submitter is using a regular brand account
      */
-    @Indexed
-    @Field("_uCreator")
     UUID uCreator;
 
     /**
@@ -68,14 +56,12 @@ public class FalsehoodDocument extends Resource {
     /**
      * List of Brands that could constitute the culprits
      */
-    @Indexed
-    List<UUID> culprits = new ArrayList<>();
+    List<Brand> culprits = new ArrayList<>();
 
     /**
      * List of targets of the Falsehood
      */
-    @Indexed
-    List<UUID> targets = new ArrayList<>();
+    List<Brand> targets = new ArrayList<>();
 
     /**
      * Stage the Falsehood entry is currently in

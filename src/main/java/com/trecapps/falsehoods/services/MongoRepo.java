@@ -1,8 +1,6 @@
 package com.trecapps.falsehoods.services;
 
-import com.trecapps.falsehoods.models.Brand;
-import com.trecapps.falsehoods.models.ResourceType;
-import com.trecapps.falsehoods.models.ReviewStage;
+import com.trecapps.falsehoods.models.*;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +13,14 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.LimitOperation;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -52,6 +52,13 @@ public class MongoRepo {
         this.falsehoodsCollection = falsehoodsCollection1;
     }
 
+    Flux<Optional<Brand>> getBrandsByList(List<UUID> uuids) {
+        Query query = new Query().addCriteria(new Criteria().where("id_").in(uuids));
+
+        return this.template.find(query, Brand.class, this.brandsCollection)
+                .map(Optional::of)
+                .switchIfEmpty(Mono.just(Optional.empty()));
+    }
 
     Flux<Brand> findBrands(String search, boolean all, @Nullable ResourceType resourceType, int limit){
 
@@ -84,6 +91,16 @@ public class MongoRepo {
 
     Mono<Brand> saveBrand(Brand brand){
         return this.template.save(brand, this.brandsCollection);
+    }
+
+    Mono<Optional<FalsehoodDocument>> retrieveFalsehood(UUID id){
+        return this.template.findById(id, FalsehoodDocument.class, this.falsehoodsCollection)
+                .map(Optional::of)
+                .switchIfEmpty(Mono.just(Optional.empty()));
+    }
+
+    Mono<FalsehoodDocument> saveFalsehood(FalsehoodDocument document){
+        return this.template.save(document, this.falsehoodsCollection);
     }
 
 }

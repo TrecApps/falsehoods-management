@@ -2,6 +2,7 @@ package com.trecapps.falsehoods.services;
 
 import com.azure.core.credential.AzureNamedKeyCredential;
 import com.azure.core.util.BinaryData;
+import com.azure.core.util.serializer.TypeReference;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.storage.blob.BlobAsyncClient;
 import com.azure.storage.blob.BlobContainerAsyncClient;
@@ -10,10 +11,12 @@ import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.trecapps.falsehoods.models.BrandContent;
+import com.trecapps.falsehoods.models.ContentVersion;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 
 @Slf4j
 public class AzureObjectStorageService implements IObjectStorageService {
@@ -108,7 +111,34 @@ public class AzureObjectStorageService implements IObjectStorageService {
                         return Mono.just(content1);
                     return thumbnailClient.upload(BinaryData.fromString(thumbnailData)).thenReturn(content1);
                 });
+    }
 
+    @Override
+    public Mono<SortedSet<ContentVersion>> persistFalsehoodContent(UUID id, String content){
+        return getFalsehoodContent(id)
+                .flatMap((SortedSet<ContentVersion> pieces) -> {
+                    pieces.add(new ContentVersion(pieces.size() + 1, Instant.now(), content));
+                    return containerClient.getBlobAsyncClient(getFalsehoodId(id)).upload(BinaryData.fromObject(pieces), true)
+                            .thenReturn(pieces);
+                });
+    }
 
+    @Override
+    public Mono<SortedSet<ContentVersion>> getFalsehoodContent(UUID id){
+        return Mono.just(getFalsehoodId(id))
+                .map((String fileName) -> Optional.ofNullable(this.containerClient.getBlobAsyncClient(fileName)))
+                .flatMap((Optional<BlobAsyncClient> blobClient) -> {
+                    return blobClient.<Mono<? extends SortedSet<ContentVersion>>>map(blobAsyncClient -> blobAsyncClient.exists().flatMap((Boolean b) -> {
+                        if (!b)
+                            return Mono.just(new TreeSet<>());
+
+                        return blobAsyncClient.downloadContent().map((BinaryData bd) -> {
+                            List<ContentVersion> list = bd.toObject(new TypeReference<>() {
+                            });
+                            return new TreeSet<>(list);
+                        });
+
+                    })).orElseGet(() -> Mono.just(new TreeSet<>()));
+                });
     }
 }
