@@ -1,6 +1,7 @@
 package com.trecapps.falsehoods.controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trecapps.falsehoods.models.Brand;
 import com.trecapps.falsehoods.models.BrandComplete;
 import com.trecapps.falsehoods.models.BrandContent;
@@ -10,6 +11,7 @@ import com.trecapps.falsehoods.services.WelcomeService;
 import com.trecauth.common.model.AccountList;
 import com.trecauth.common.model.TrecauthAuthentication;
 import lombok.Data;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -33,12 +35,17 @@ public class FrontendRouter {
     @Autowired
     BrandService brandService;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     @Value("${trecapps.image.url}")
     String imageUrl;
     @Value("${trecapps.falsehoods.url}")
     String falsehoodsUrl;
     @Value("${trecapps.falsehoods.base-path}")
     String falsehoodsPath;
+
+
 
     @Data
     static
@@ -77,6 +84,15 @@ public class FrontendRouter {
         dataMap.put("elementItemSetting", elementStyle.replace("container", "item"));
     }
 
+    String convertObjectToString(Object o){
+        try{
+            return objectMapper.writeValueAsString(o);
+        } catch(JsonProcessingException e){
+            return null;
+        }
+    }
+
+    @SneakyThrows
     Map<String, Object> getDataMap(FrontendData<?> data){
         Map<String, Object> dataMap = new HashMap<>();
         AccountList list = data.getAccountList();
@@ -84,6 +100,7 @@ public class FrontendRouter {
         dataMap.put("imageServiceUrl", imageUrl);
         dataMap.put("falsehoodServiceUrl", falsehoodsUrl);
         dataMap.put("baseUrl", falsehoodsPath);
+        dataMap.put("isResourceEmployee", list != null && list.getMainAccount().getPermissions().contains("RESOURCE_EMPLOYEE"));
         if(list != null){
             String profilePic = String.format("%s/profile/%s", this.imageUrl, list.getMainAccount().getId());
             dataMap.put("profilePic", profilePic);

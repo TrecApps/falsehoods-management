@@ -22,6 +22,7 @@
 <body>
 
     <div th:replace="~{fragments/topbar :: bar}"></div>
+    <div style="height:50px"></div>
 
     <div style="padding-top: 10px;" th:class="${elementContainerSetting + ' container element-container'}">
         <div th:class="${elementItemSetting + ' element-item form-group'}">
@@ -77,13 +78,13 @@
     </div>
 
 
-    <script>
+    <script th:inline="javascript">
         var brandContent = [[${brandContent}]]
         var brandMetadata = [[${metadata}]]
 
-        var itemStyle = "[[${elementItemSetting}]]"
+        var itemStyle = [[${elementItemSetting}]]
 
-        var falsehoodServiceUrl = "[[${falsehoodServiceUrl}]]"
+        var falsehoodServiceUrl = [[${falsehoodServiceUrl}]]
 
         var resourceTypes = [
             "PUBLIC_FIGURE",
@@ -136,7 +137,7 @@
             "svg",
             "webp"];
 
-        var availableTypes [];
+        var availableTypes = [];
 
         var resourceType = undefined;
 
@@ -144,7 +145,7 @@
 
         function recalibrateTypes() {
             availableTypes = resourceTypes.filter((t) => {
-                return !metadata.resourceTypes.contains(t);
+                return !brandMetadata.resourceTypes.includes(t);
             });
 
 
@@ -159,7 +160,7 @@
         }
 
         function recalibrateTypeSelect(selectElement){
-            element.options.length = 0;
+            selectElement.options.length = 0;
 
             let o = document.createElement("option");
             o.value = "";
@@ -170,7 +171,7 @@
             for(let t of availableTypes){
                 o = document.createElement("option");
                 o.value = t;
-                o.innerHTML = totTitleCase(t);
+                o.innerHTML = toTitleCase(t);
                 o.selected = false;
                 selectElement.appendChild(o);
             }
@@ -227,7 +228,7 @@
                 }
             }
 
-            selectedFile.arrayBuffer().then((value: ArrayBuffer)=> {
+            selectedFile.arrayBuffer().then((value) => {
                 let buffer = new Uint8Array(value);
 
                 const STRING_CHAR = buffer.reduce((data, byte)=> {return data + String.fromCharCode(byte);}, '');
@@ -243,7 +244,7 @@
 
         }
 
-        recalibrateMetadata() {
+        function recalibrateMetadata() {
 
             let metadataTable = document.getElementById("metadata-table");
 
@@ -251,7 +252,7 @@
 
             let metadata = brandContent.metadata;
 
-            for (const [key, value] of Object.entries(user)) {
+            for (const [key, value] of Object.entries(metadata)) {
                 let row = document.createElement("tr");
                 let d1 = document.createElement("td");      // Simply holds the Field Name
                 let d2 = document.createElement("td");      // Holds the input to edit the field content

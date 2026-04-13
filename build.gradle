@@ -39,9 +39,9 @@ dependencies {
     implementation 'net.coobird:thumbnailator:0.4.21'
 
     // Basic Security help
-    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-azure', version: '0.0.42')
-    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-core', version: '0.0.42')
-    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-mongo', version: '0.0.42')
+    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-azure', version: '0.0.43')
+    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-core', version: '0.0.43')
+    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-mongo', version: '0.0.43')
 
     // Security Dependencies
     implementation "org.springframework.boot:spring-boot-starter-security"
@@ -57,6 +57,9 @@ dependencies {
     implementation "com.microsoft.azure:applicationinsights-runtime-attach:3.7.6"
     implementation "com.azure.spring:spring-cloud-azure-starter-keyvault"
     implementation 'com.azure:azure-storage-blob'
+
+    // Source: https://mvnrepository.com/artifact/ognl/ognl
+//    implementation 'ognl:ognl:3.4.11'
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'

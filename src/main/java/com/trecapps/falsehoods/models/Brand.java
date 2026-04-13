@@ -12,7 +12,6 @@ import java.util.UUID;
 /**
  * Represents an entity to which Falsehoods can be attributed
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
 public class Brand extends Resource {
 
@@ -45,4 +44,6 @@ public class Brand extends Resource {
      * Link to a verified Brand Account
      */
     UUID brandId;
+
+
 }

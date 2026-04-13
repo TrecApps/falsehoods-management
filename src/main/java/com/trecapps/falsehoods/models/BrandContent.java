@@ -1,5 +1,6 @@
 package com.trecapps.falsehoods.models;
 
+import com.trecauth.common.model.Resource;
 import lombok.Data;
 
 import java.util.ArrayList;

@@ -39,6 +39,10 @@
 <!--                <a class="nav-link" >Factchecks</a>-->
             </li>
 
+            <li th:if="${isResourceEmployee}">
+                <a class="btn btn-primary nav-item" href="ArticleEdit">Create Article</a>
+            </li>
+
         </div>
 
 <!--        <div style="padding: 5px;">-->
@@ -69,7 +73,7 @@
             <div class="profile-img">
                 <img th:src="${profilePic}">
             </div>
-            <div class="profile-name" th:text="${list.getMainAccount().getDisplayName}">
+            <div class="profile-name" th:text="${list.mainAccount.getDisplayName}">
 
             </div>
         </div>
@@ -79,7 +83,7 @@
             th:if="${list == null}"
             href="Login"
         >
-            <button class="btn btn-primary desktop-login">Log in</button>
+            <button class="btn btn-primary desktop-login" style="height: 100%">Log in</button>
         </a>
 
 
@@ -146,17 +150,18 @@
 </div>
 
 
+
 <div
         class="bottom-bar element-container" style="zIndex:35" th:classappend="${elementContainerSetting}">
 
     <div class="bottom-bar-holder">
-        <img th:src="@{/images/Welcome-icon.png}">
+        <img src="images/Welcome-icon.png">
     </div>
     <div class="bottom-bar-holder">
-        <img th:src="@{/images/Falsehood-icon-mob.png}">
+        <img src="images/Falsehood-icon-mob.png">
     </div>
     <div class="bottom-bar-holder">
-        <img th:src="@{/images/Factcheck-logo-mob.png}">
+        <img src="images/Factcheck-logo-mob.png">
     </div>
 
 
@@ -174,7 +179,7 @@
             th:if="${user == null}"
             class="bottom-bar-holder"
     >
-        <img th:src="@{/images/non-profile-mob.png}" alt="Login">
+        <img src="images/non-profile-mob.png" alt="Login">
     </div>
 </div>
 </div>

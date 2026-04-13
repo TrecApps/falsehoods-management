@@ -6,4 +6,5 @@ import lombok.Data;
 public class BrandComplete {
     Brand metadata;
     BrandContent content;
+
 }
