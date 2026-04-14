@@ -7,11 +7,16 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.*;
+
+import static com.trecapps.falsehoods.services.FalsehoodAuthorities.EMPLOYEE_AUTH;
 
 @Service
 @Slf4j
@@ -22,6 +27,14 @@ public class FalsehoodPrepareService {
 
     @Autowired
     IObjectStorageService storageService;
+
+    private static final List<String> employeePatchFields = List.of(
+            "culprits",
+            "culprits-remove",
+            "severity",
+            "targets",
+            "targets-remove"
+    );
 
     Mono<Boolean> validateBrandExistence(List<UUID> uuids){
         return this.mongoRepo.getBrandsByList(uuids)
@@ -52,6 +65,26 @@ public class FalsehoodPrepareService {
                 return tag;
         }
         return null;
+    }
+
+    boolean attemptSetBrowserDate(FalsehoodDocument falsehood, String date){
+        String[] datePieces = date.split("-");
+        if(datePieces.length != 3)
+            return false;
+
+        try{
+            int year = Integer.parseInt(datePieces[0]);
+            int month = Integer.parseInt(datePieces[1]);
+            int day = Integer.parseInt(datePieces[2]);
+
+            Calendar cal = Calendar.getInstance();
+            cal.set(year, month, day);
+            falsehood.setDateMade(cal.getTime());
+            return true;
+        } catch(Exception e){
+            log.error("Could not parse {}", date, e);
+            return false;
+        }
     }
 
     public Mono<ResponseObj> submitExistingFalsehood(@NotNull AccountList accountList, @NotNull UUID id){
@@ -161,5 +194,212 @@ public class FalsehoodPrepareService {
                 return record.getUCreator();
         }
         return null;
+    }
+
+    public Mono<ResponseObj> patchFalsehood(@NotNull AccountList accountList, UUID falsehoodId, FalsehoodPatch patch){
+
+        return Mono.just(falsehoodId)
+                .flatMap(mongoRepo::retrieveFalsehood)
+                .map((Optional<FalsehoodDocument> o) -> {
+                    if(o.isEmpty())
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Falsehood Entry Not Found");
+
+                    FalsehoodDocument falsehood = o.get();
+
+                    boolean acceptState = false;
+                    if(FalsehoodStage.SAVED.equals(falsehood.getStatus()) ||
+                            FalsehoodStage.SUBMITTED.equals(falsehood.getStatus())){
+                        acceptState = true;
+                        if(!accountList.getMainUserAccount().getId().equals(getCreator(falsehood)))
+                            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator of the falsehood may alter the falsehood at the SAVED/SUBMITTED Stage!");
+                    }
+
+                    if(FalsehoodStage.ACCEPTED.equals(falsehood.getStatus())){
+                        acceptState = true;
+                        if(!accountList.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList().contains(EMPLOYEE_AUTH))
+                            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only TrecApps Falsehood staff may alter a falsehood at the ACCEPTED Stage!");
+
+                        if(!employeePatchFields.contains(patch.getField()))
+                            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Employees may only change the following fields: " + employeePatchFields);
+
+                    }
+
+                    if(!acceptState)
+                        throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Falsehoods can only be altered at the SAVED, SUBMITTED, or ACCEPTED Stage!");
+
+                    return falsehood;
+                })
+                .flatMap((FalsehoodDocument falsehood) -> {
+
+                    final String[] value = {patch.getValue()};
+
+                    return storageService.getFalsehoodContent(falsehoodId)
+                            .flatMap((SortedSet<ContentVersion> contents) -> {
+                                boolean removeOp = true;
+                                switch(patch.getField()){
+                                    case "culprits":
+                                    case "targets":
+                                        removeOp = false;
+                                    case "culprits-remove":
+                                    case "targets-remove":
+
+                                    {
+                                        UUID brandId;
+                                        try{
+                                            brandId = UUID.fromString(value[0]);
+                                        } catch(Exception ignore){
+                                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Value needs to be in valid UUID format");
+                                        }
+
+                                        boolean finalRemoveOp = removeOp;
+                                        return this.mongoRepo.retrieveBrand(brandId)
+                                                .map(Optional::of)
+                                                .switchIfEmpty(Mono.just(Optional.empty()))
+                                                .flatMap((Optional<Brand> brand) -> {
+                                                    if(brand.isEmpty())
+                                                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Brand not currently listed in the database!");
+
+                                                    List<UUID> list = patch.getField().startsWith("targets")
+                                                            ? falsehood.getTargets() : falsehood.getCulprits();
+
+                                                    if(finalRemoveOp)
+                                                        list.remove(brandId);
+                                                    else
+                                                        list.add(brandId);
+
+                                                    return this.mongoRepo.saveFalsehood(falsehood);
+                                                });
+                                    }
+
+                                    case "title":
+                                        if(value[0] == null || value[0].trim().isEmpty())
+                                            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Title must not be blank!");
+                                        // ToDo: Verify the contents of the title
+
+
+                                        // End ToDo
+
+                                        falsehood.setTitle(value[0].trim());
+                                        break;
+                                    case "severity":
+                                    {
+                                        try{
+                                            FalsehoodSeverity severity = FalsehoodSeverity.valueOf(value[0]);
+                                            falsehood.setSeverity(severity);
+                                        } catch(IllegalArgumentException exception){
+                                            throw new ResponseStatusException( HttpStatus.BAD_REQUEST, String.format("Argument of '%s' cannot be applied to 'severity'", value[0]));
+                                        }
+                                        break;
+                                    }
+                                    case "dateMade":
+                                    {
+                                        try{
+                                            DateFormat.getDateInstance();
+                                            falsehood.setDateMade(DateFormat.getDateInstance().parse(value[0]));
+                                        }catch(ParseException exception){
+                                            if(!attemptSetBrowserDate(falsehood, value[0]))
+                                                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Argument of '%s' cannot be applied to a date", value[0]));
+                                        }
+                                        break;
+                                    }
+                                    case "notes":
+                                        falsehood.setNotes(value[0]);
+                                    case "content":{
+
+//                                        List<String> tags = falsehood.getTags().stream().toList();
+//                                        String tag = validateTags(value[0], tags);
+//                                        if(tag != null)
+//                                            throw new ObjectResponseException(String.format("Tag '%s' not found in the new body!", tag), HttpStatus.BAD_REQUEST);
+
+                                        return storageService.persistFalsehoodContent(falsehoodId, value[0]).thenReturn(falsehood);
+                                    }
+                                    default:
+                                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Unknown field '%s'", patch.getField()));
+
+
+
+//                                    if(falsehoodSubmission.getDateMade() == null && !FalsehoodSeverity.TITLE_OR_SLOGAN.equals(submission.getSeverity()))
+//                                        throw new ObjectResponseException("A Date must be provided for non-chronic falsehoods!", HttpStatus.BAD_REQUEST);
+                                }
+
+                                return Mono.just(falsehood);
+                            });
+
+                }).flatMap((FalsehoodDocument falsehood) -> {
+
+                    // ToDo - Once a Records Service is set up, Have it update the
+                    //  records not yet added to the Falsehood Document
+
+
+                    // End ToDo
+
+
+                    if(!FalsehoodStage.ACCEPTED.equals(falsehood.getStatus())) {
+                        for (Record record : falsehood.getRecords()) {
+                            if ("ACCEPT".equals(record.getType()))
+                                record.setType("ACCEPT_OUT");
+                            else if("REJECT".equals(record.getType()))
+                                record.setType("REJECT_OUT");
+                        }
+                    }
+
+                    return mongoRepo.saveFalsehood(falsehood)
+                            .thenReturn(ResponseObj.getInstance200("Success!"));
+
+                }).onErrorResume(ResponseStatusException.class, (ResponseStatusException ex) -> Mono.just(ex.toResponse()));
+
+    }
+
+
+    public Mono<ResponseObj> deleteFalsehood(@NotNull AccountList accountList, UUID falsehoodId) {
+        return Mono.just(falsehoodId)
+                .flatMap(mongoRepo::retrieveFalsehood)
+                .map((Optional<FalsehoodDocument> o) -> {
+                    if(o.isEmpty())
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Falsehood Entry Not Found");
+
+                    FalsehoodDocument falsehood = o.get();
+
+                    if(FalsehoodStage.DELETED.equals(falsehood.getStatus()))
+                        throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Object already 'deleted'");
+
+                    boolean userAccept = false;
+                    if(accountList.getMainUserAccount().getId().equals(getCreator(falsehood))){
+                        userAccept = true;
+
+                        if(FalsehoodStage.CONFIRMED.equals(falsehood.getStatus()))
+                            throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Cannot delete a 'confirmed' falsehood!");
+
+                        if(FalsehoodStage.R_APPEALED.equals(falsehood.getStatus()) ||
+                                FalsehoodStage.S_APPEALED.equals(falsehood.getStatus()))
+                            throw new ResponseStatusException(HttpStatus.CONFLICT, "Falsehood is currently under appeal!");
+                    }
+
+                    else if(accountList.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList().contains(EMPLOYEE_AUTH)){
+                        userAccept = true;
+                    }
+
+                    if(!userAccept)
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to delete this falsehood entry");
+                    return falsehood;
+                })
+
+                .flatMap((FalsehoodDocument f) -> {
+                    f.setStatus(FalsehoodStage.DELETED);
+
+                    Record deleteRecord = new Record();
+                    deleteRecord.setId(UUID.randomUUID());
+                    deleteRecord.setMade(Instant.now());
+                    deleteRecord.setUCreator(accountList.getMainUserAccount().getId());
+                    deleteRecord.setResourceId(f.getId());
+                    deleteRecord.setCreator(accountList.getMainAccount().getId());
+                    deleteRecord.setType("DELETED");
+                    f.getRecords().add(deleteRecord);
+                    return mongoRepo.saveFalsehood(f)
+                            .thenReturn(ResponseObj.getInstance200("Success"));
+
+
+                }).onErrorResume(ResponseStatusException.class, (ResponseStatusException ex) -> Mono.just(ex.toResponse()));
+
     }
 }
