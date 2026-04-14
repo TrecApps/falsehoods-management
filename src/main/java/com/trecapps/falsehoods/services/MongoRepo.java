@@ -1,6 +1,7 @@
 package com.trecapps.falsehoods.services;
 
 import com.trecapps.falsehoods.models.*;
+import com.trecauth.common.model.Record;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class MongoRepo {
@@ -101,6 +99,20 @@ public class MongoRepo {
 
     Mono<FalsehoodDocument> saveFalsehood(FalsehoodDocument document){
         return this.template.save(document, this.falsehoodsCollection);
+    }
+
+    Flux<FalsehoodRecord> findAllRecordsByFalsehoodId(UUID id){
+        Query query = new Query().addCriteria(Criteria.where("f_resource_id").is(id));
+        return this.template.find(query, FalsehoodRecord.class, this.falsehoodRecordsCollection);
+    }
+
+    Flux<FalsehoodRecord> saveRecords(Collection<Record> records){
+        return this.template.insertAll(Mono.just(records).map((Collection<Record> r) -> {
+            return r
+                    .stream()
+                    .map(FalsehoodRecord::getInstance)
+                    .toList();
+        }), this.falsehoodRecordsCollection);
     }
 
 }
