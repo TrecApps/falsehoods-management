@@ -17,11 +17,11 @@ public class Brief implements Comparable<Brief> {
     }
     @MongoId
     UUID id;
-    String falsehoodId;
+    UUID falsehoodId;
 
 
-    UUID userId;
-    UUID brandId;
+    UUID uAccount;
+    UUID account;
     Integer version;
     String displayName;
     BriefPurpose purpose;
@@ -31,7 +31,7 @@ public class Brief implements Comparable<Brief> {
     SortedSet<ContentVersion> content = new TreeSet<>();
 
     public void filter(UUID userId){
-        if(userId != null && (userId.equals(this.userId) || userId.equals(this.brandId)))
+        if(userId != null && (userId.equals(this.uAccount) || userId.equals(this.account)))
             return;
 
         // Just return the last version if not owned by the creator or
@@ -40,5 +40,12 @@ public class Brief implements Comparable<Brief> {
             content = new TreeSet<>();
             contentElement.ifPresent(ContentVersion -> content.add(ContentVersion));
         }
+    }
+
+    public void update(String newContents){
+        Instant now = Instant.now();
+        Optional<ContentVersion> contentElement = HelperMethods.getLast(content);
+        int newVersion = contentElement.map(ContentVersion -> ContentVersion.version() + 1).orElse(1);
+        content.add(new ContentVersion(newVersion, now, newContents));
     }
 }

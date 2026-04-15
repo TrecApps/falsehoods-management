@@ -115,4 +115,17 @@ public class MongoRepo {
         }), this.falsehoodRecordsCollection);
     }
 
+    Flux<Brief> retrieveBriefsByFalsehood(UUID falsehoodId){
+        Query query = new Query().addCriteria(Criteria.where("falsehoodId").is(falsehoodId));
+        return this.template.find(query, Brief.class, this.briefsCollection);
+    }
+
+    Mono<Brief> retrieveBriefById(UUID id){
+        return this.template.findById(id, Brief.class, this.briefsCollection);
+    }
+
+    Mono<Brief> saveBrief(Brief brief){
+        return this.template.save(brief, this.briefsCollection);
+    }
+
 }
