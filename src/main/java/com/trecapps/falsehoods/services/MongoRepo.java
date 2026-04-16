@@ -50,7 +50,7 @@ public class MongoRepo {
         this.falsehoodsCollection = falsehoodsCollection1;
     }
 
-    Flux<Optional<Brand>> getBrandsByList(List<UUID> uuids) {
+    Flux<Optional<Brand>> getBrandsByList(Collection<UUID> uuids) {
         Query query = new Query().addCriteria(new Criteria().where("id_").in(uuids));
 
         return this.template.find(query, Brand.class, this.brandsCollection)
@@ -99,6 +99,10 @@ public class MongoRepo {
 
     Mono<FalsehoodDocument> saveFalsehood(FalsehoodDocument document){
         return this.template.save(document, this.falsehoodsCollection);
+    }
+
+    Flux<FalsehoodDocument> searchFalsehoods(Aggregation aggregation){
+        return this.template.aggregate(aggregation, this.falsehoodsCollection, FalsehoodDocument.class);
     }
 
     Flux<FalsehoodRecord> findAllRecordsByFalsehoodId(UUID id){
