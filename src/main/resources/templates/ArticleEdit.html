@@ -61,8 +61,8 @@
                         <textarea class="form-control" id="profile-desc-edit"></textarea>
                     </div>
                 </div>
-                <div class="rs-table-holder-edit">
-                    <table id="metadata-table">
+                <div class="rs-table-holder">
+                    <table id="metadata-table" style="width: 100%">
 
                     </table>
                 </div>
@@ -195,12 +195,12 @@
                 exit.appendChild(name);
                 item.appendChild(exit);
 
-                typeHolderElement(item);
+                typeHolderElement.appendChild(item);
 
 
                 exit.addEventListener("click", (e) => {
 
-                    brandMetadata.resourceTypes = brandMetaData.resourceTypes.filter((entry) => {
+                    brandMetadata.resourceTypes = brandMetadata.resourceTypes.filter((entry) => {
                         return entry != t;
                     });
 
@@ -261,6 +261,7 @@
                 d1.textContent = key;
 
                 let d2Input = document.createElement("input");
+                d2Input.value = value;
                 d2Input.classList.add("form-control");
                 d2Input.addEventListener("change", (e) => {
                     metadata[key] = e.target.value;
@@ -270,6 +271,7 @@
                 let d3Button = document.createElement("button");
                 d3Button.classList.add("btn");
                 d3Button.classList.add("btn-danger");
+                d3Button.textContent = "Remove";
                 d3Button.addEventListener("click", (e) => {
                     Reflect.deleteProperty(metadata, key);
                     recalibrateMetadata();
@@ -291,16 +293,17 @@
             addButton.classList.add("btn");
             addButton.classList.add("btn-primary");
             addButton.style.width = '100%';
+            addButton.textContent = "Add Field";
             addButton.addEventListener("click", () => {
 
-                let field = input("Name of the new field:");
+                let field = prompt("Name of the new field:");
 
-                metadata[key] = "";
+                metadata[field] = "";
                 recalibrateMetadata();
             });
 
             d1.appendChild(addButton);
-
+            row.appendChild(d1);
             metadataTable.appendChild(row);
         }
 
@@ -320,6 +323,12 @@
                     "Content-Type": "application/json"
                 }
             }).then(async (response) => {
+
+                if(response.status > 201) throw "";
+
+                console.log("Response is: ", response);
+
+
 
                 let responseObj = await response.json();
 

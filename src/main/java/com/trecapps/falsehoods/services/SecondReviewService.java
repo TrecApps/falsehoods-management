@@ -5,6 +5,7 @@ import com.trecauth.common.model.Account;
 import com.trecauth.common.model.AccountList;
 import com.trecauth.common.model.Record;
 import com.trecauth.common.model.UserAccount;
+import com.trecauth.webflux.repos.AccountReactiveRepository;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Mono;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.trecapps.falsehoods.models.RecordEvent.*;
 import static com.trecapps.falsehoods.services.FalsehoodAuthorities.EMPLOYEE_AUTH;
@@ -45,27 +47,32 @@ public class SecondReviewService {
     @Autowired
     MongoRepo mongoRepo;
 
+    @Autowired
+    AccountReactiveRepository accountRepo;
+
     void updateCredibility(UserAccount user, int pointChange){
         user.setCredibility(user.getCredibility().add(BigInteger.valueOf(pointChange)));
-        // userStorageService.saveUser(user);
+        // ToDo switch to a message queue so that individual processes don't override each other
+        accountRepo.saveAccount(user).subscribe();
+
     }
 
-//    int deniedPoints(FalsehoodDocument falsehood, List<Record> toUpdate){
-//        int ret = 0;
-//        for(Record prevRecord:falsehood.getRecords()){
-//            if("DENIED".equals(prevRecord.getType())){
-//                Integer taken = prevRecord.getPoints();
-//                if(taken != null && taken > 0){
-//                    ret += taken;
-//                    prevRecord.setPoints(-taken);
-//                    if(prevRecord.getId() != null){
-//                        toUpdate.add(prevRecord);
-//                    }
-//                }
-//            }
-//        }
-//        return ret;
-//    }
+    int deniedPoints(FalsehoodDocument falsehood, List<Record> toUpdate){
+        int ret = 0;
+        for(Record prevRecord:falsehood.getRecords()){
+            if("DENIED".equals(prevRecord.getType())){
+                Integer taken = prevRecord.getPoints();
+                if(taken != null && taken > 0){
+                    ret += taken;
+                    prevRecord.setPoints(-taken);
+                    if(prevRecord.getId() != null){
+                        toUpdate.add(prevRecord);
+                    }
+                }
+            }
+        }
+        return ret;
+    }
 
 
     public Mono<ResponseObj> postReview(
@@ -122,10 +129,10 @@ public class SecondReviewService {
 
                     record.setType(action.toString());
 
-//                    if (action == DENY) {
-//                        if (removePoints > 0)
-//                            record.setPoints(Math.min(removePoints,maxDenyPoints));
-//                    }
+                    if (action == DENY) {
+                        if (removePoints > 0)
+                            record.setPoints(Math.min(removePoints,maxDenyPoints));
+                    }
 
 
                     // Update the needed Records
@@ -164,11 +171,11 @@ public class SecondReviewService {
                                 break;
                             case "DENY": {
                                 reject++;
-//                                Integer deductPoints = prevRecord.getPoints();
-//                                if (deductPoints != null && deductPoints > 0) {
-//                                    penalize += deductPoints;
-//                                    penalizeCount++;
-//                                }
+                                Integer deductPoints = prevRecord.getPoints();
+                                if (deductPoints != null && deductPoints > 0) {
+                                    penalize += deductPoints;
+                                    penalizeCount++;
+                                }
                             }
                         }
                     }
@@ -184,9 +191,9 @@ public class SecondReviewService {
                         updateRecords.add(newRecord);
 
                         // Check to see if person previously lost points from a denial
-                        //int addPoints = confirmPoints + deniedPoints(falsehood, updateRecords);
+                        int addPoints = confirmPoints + deniedPoints(falsehood, updateRecords);
 
-                        //updateCredibility(user, addPoints);
+                        updateCredibility(accountList.getMainUserAccount(), addPoints);
                     } else if (reject >= rawThreshold && (reject / (double) (accept + reject)) >= threshold) {
                         falsehood.setStatus(FalsehoodStage.DENIED);
                         Record newRecord = new Record();
@@ -199,7 +206,7 @@ public class SecondReviewService {
                         if (penalizeCount > 0){
                             int take = (int) ((double) penalize / penalizeCount);
                             updateCredibility(accountList.getMainUserAccount(), -take);
-                            //newRecord.setPoints(take);
+                            newRecord.setPoints(take);
                         }
                     }
 
@@ -223,10 +230,16 @@ public class SecondReviewService {
 
     }
 
-//    boolean isBrandLinked(Account brands, FalsehoodDocument falsehood){
-//        String brandId = brands == null ? null : brands.ge();
-//        return brandId != null && falsehood.getCulprits().contains(brandId);
-//    }
+    boolean isBrandLinked(AccountList brands, FalsehoodDocument falsehood){
+
+        List<UUID> brandIds = brands.getBrandAccounts().stream().map(Account::getId).toList();
+
+        for(UUID brandId: brandIds){
+            if(falsehood.getTargets().contains(brandId) || falsehood.getCulprits().contains(brandId))
+                return true;
+        }
+        return false;
+    }
 
     public Mono<ResponseObj> appeal(
             @NotNull AccountList accountList,
@@ -248,7 +261,7 @@ public class SecondReviewService {
                     if(!(
                             user.getCredibility().compareTo(BigInteger.valueOf(jurorPointThreshold)) > -1 || !user.getId().equals(falsehood.getUCreator()) ||
                                     accountList.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList().contains(EMPLOYEE_AUTH)
-                                    //|| isBrandLinked(brands, falsehood)
+                                    || isBrandLinked(accountList, falsehood)
                     ))
                         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                                 String.format(

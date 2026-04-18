@@ -373,8 +373,8 @@ function initMarkdownEditor(editorId, initialContent) {
       if (el) {
         const capName = name.charAt(0).toUpperCase() + name.slice(1);
         el.src = active
-          ? `/md-images/sel-${capName}.png`
-          : `/md-images/reg-${capName}.png`;
+          ? `md-images/sel-${capName}.png`
+          : `md-images/reg-${capName}.png`;
       }
     }
     // Header buttons H1–H6
@@ -382,8 +382,8 @@ function initMarkdownEditor(editorId, initialContent) {
       const el = imgEl('h' + h);
       if (el) {
         el.src = (isHeader === h)
-          ? `/md-images/sel-H${h}.png`
-          : `/md-images/reg-H${h}.png`;
+          ? `md-images/sel-H${h}.png`
+          : `md-images/reg-H${h}.png`;
       }
     }
   }

@@ -2,6 +2,7 @@ package com.trecapps.falsehoods.services;
 
 import com.trecapps.falsehoods.models.BrandContent;
 import com.trecapps.falsehoods.models.ContentVersion;
+import lombok.Data;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,26 @@ import java.util.UUID;
 @Service
 public interface IObjectStorageService {
 
-    default String generateThumbnail(String base64Image, int width, int height){
-        // Decode the base64 image
-        byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+    @Data
+    static class ImageData {
+        String bigImage;
+        byte[] thumbnail;
+        String imageType;
+    }
 
-        try(ByteArrayInputStream bais = new ByteArrayInputStream(imageBytes)){
+    default ImageData generateThumbnail(String base64Image, int width, int height){
+
+        String[] basePieces = base64Image.split(";base64,");
+
+        ImageData imageData = new ImageData();
+
+        imageData.imageType = basePieces[0].substring(5);
+        imageData.bigImage = base64Image;
+
+        // Decode the base64 image
+        byte[] bigImage = Base64.getDecoder().decode(basePieces[1]);
+
+        try(ByteArrayInputStream bais = new ByteArrayInputStream(bigImage)){
             BufferedImage originalImage = ImageIO.read(bais);
             if(originalImage == null)
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image data!");
@@ -31,12 +47,13 @@ public interface IObjectStorageService {
             // Create Thumbnail
             BufferedImage thumbnail = Thumbnails.of(originalImage)
                     .size(width, height)
-                    .outputFormat("jpeg")
+                    .outputFormat(imageData.imageType.substring(6))
                     .asBufferedImage();
 
             try(ByteArrayOutputStream baos = new ByteArrayOutputStream()){
-                ImageIO.write(thumbnail, "jpeg", baos);
-                return Base64.getEncoder().encodeToString(baos.toByteArray());
+                ImageIO.write(thumbnail, imageData.imageType.substring(6), baos);
+                imageData.thumbnail = baos.toByteArray();
+                return imageData;
             }
         } catch(IOException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image data!");

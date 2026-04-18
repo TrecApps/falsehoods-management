@@ -8,6 +8,8 @@ import com.azure.storage.blob.BlobAsyncClient;
 import com.azure.storage.blob.BlobContainerAsyncClient;
 import com.azure.storage.blob.BlobServiceAsyncClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobHttpHeaders;
+import com.azure.storage.blob.models.BlockBlobItem;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.trecapps.falsehoods.models.BrandContent;
@@ -74,7 +76,16 @@ public class AzureObjectStorageService implements IObjectStorageService {
                     if(!exists) return Mono.just(imageFallback);
 
                     return blobAsyncClient.downloadContent()
-                            .map((BinaryData data) -> new String(data.toBytes()));
+                            .flatMap((BinaryData data) -> {
+                                byte[] bData = data.toBytes();
+
+                                return blobAsyncClient.getTags()
+                                        .map((Map<String,String> tags) -> {
+                                           return String.format("data:%s;base64,%s", tags.get("type"),
+                                                   Base64.getEncoder().encodeToString(bData));
+                                        });
+
+                            });
                 });
     }
 
@@ -99,17 +110,26 @@ public class AzureObjectStorageService implements IObjectStorageService {
         BlobAsyncClient contentClient = this.containerClient.getBlobAsyncClient(String.format("%s-brand-content.json", id));
         BlobAsyncClient thumbnailClient = this.containerClient.getBlobAsyncClient(String.format("%s-thumbnail", id));
 
-        String imageData = content.getImageData();
+        String imageDataStr = content.getImageData();
 
-        String thumbnailData = imageData == null ? null :
-                this.generateThumbnail(imageData, 150, 150);
+        ImageData imageData = imageDataStr == null ? null : this.generateThumbnail(imageDataStr,150, 150);
+
 
         return contentClient.upload(BinaryData.fromObject(content))
                 .thenReturn(content)
                 .flatMap((BrandContent content1) -> {
-                    if(thumbnailData == null)
+                    if(imageData == null)
                         return Mono.just(content1);
-                    return thumbnailClient.upload(BinaryData.fromString(thumbnailData)).thenReturn(content1);
+                    BinaryData data = BinaryData.fromBytes(imageData.thumbnail);
+                    BlobHttpHeaders blobHeaders = new BlobHttpHeaders()
+                            .setContentType(imageData.imageType);
+                    Map<String, String> tags = new HashMap<>();
+                    tags.put("type", imageData.imageType);
+                    return thumbnailClient.upload(data)
+                            .doOnNext((BlockBlobItem item) -> {
+                                thumbnailClient.setHttpHeaders(blobHeaders).subscribe();
+                                thumbnailClient.setTags(tags);
+                            }).thenReturn(content1);
                 });
     }
 
