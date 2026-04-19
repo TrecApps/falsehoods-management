@@ -63,7 +63,7 @@ public class MongoRepo {
         List<Criteria> criteriaList = new ArrayList<>();
 
         criteriaList.add(
-                Criteria.where("names").is(search)
+                Criteria.where("names").regex(search, "i")
         );
         if(!all)
             criteriaList.add(

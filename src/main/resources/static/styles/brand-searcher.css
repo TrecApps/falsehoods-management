@@ -1,0 +1,11 @@
+.option-holder {
+    display: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    max-height: 320px;
+    overflow-y: scroll;
+}
+
+

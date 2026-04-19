@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <div th:fragment="brandSearcher(brandSearcherId)"
+        class="form-group searcher-group"
+    >
+        <link rel="stylesheet" href="styles/brand-searcher.css" />
+        <script th:inline="javascript">
+            // Define global config before loading the external script
+            window.appConfig = {
+                brandSearchUrl: [[${falsehoodServiceUrl}]],
+                itemStyle: [[${elementItemSetting}]]
+            };
+        </script>
+        <script src="js/brand-searcher.js"></script>
+
+        <input
+                th:id="${brandSearcherId + '-brand-input'}"
+                type="text"
+                class="form-control"
+        >
+
+        <div style="display: relative">
+            <div class="option-holder" th:id="${brandSearcherId + '-brand-option-holder'}">
+
+
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            initBrandSearcher([[${brandSearcherId}]])
+        </script>
+
+    </div>
+
+
+</body>
+</html>

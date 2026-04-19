@@ -332,7 +332,7 @@
 
                 let responseObj = await response.json();
 
-                let id = response.id;
+                let id = responseObj.id;
                 window.location = `${falsehoodServiceUrl}/brands-api/${id}`;
 
             }).catch(() => {alert("Failed to save object")});

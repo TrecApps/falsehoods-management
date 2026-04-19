@@ -113,6 +113,9 @@ public class BrandService {
 
             brand1.getRecords().add(record);
 
+            if(brand1.getReviewStage() == null)
+                brand1.setReviewStage(ReviewStage.SUBMITTED);
+
             UUID finalBrandId = brandId;
             return mongoRepo.saveBrand(brand1)
                     .flatMap((Brand brand2) -> {

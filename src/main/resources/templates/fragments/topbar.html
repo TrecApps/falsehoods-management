@@ -14,8 +14,12 @@
             <img src="images/Falsehood-icon-Desktop.png">
         </div>
 
+        <div class="nav-section" id="search-holder" hidden>
+            <div th:replace="~{fragments/brand-searcher :: brandSearcher('topbar-brands')}"></div>
+            <button class="btn btn-danger" style="width: 50px" id="set-search-off"></button>
+        </div>
 
-        <div class="nav-section">
+        <div class="nav-section" id="nav-holder">
 
             <li
                     class="nav-item"
@@ -41,6 +45,10 @@
 
             <li th:if="${isResourceEmployee}">
                 <a class="btn btn-primary nav-item" style="height: 100%" href="ArticleEdit">Create Article</a>
+            </li>
+
+            <li>
+                <button id="set-search-on" class="btn btn-primary" style="height: 100%">Search Brands</button>
             </li>
 
         </div>
@@ -182,6 +190,26 @@
         <img src="images/non-profile-mob.png" alt="Login">
     </div>
 </div>
+
+    <script>
+        const brandOnButton = document.getElementById("set-search-on");
+        const brandOffButton = document.getElementById("set-search-off");
+        const searchHolder = document.getElementById("search-holder");
+        const navHolder = document.getElementById("nav-holder");
+
+        brandOnButton.addEventListener("click", () => {
+            searchHolder.hidden = false;
+            navHolder.hidden = true;
+        });
+
+        brandOffButton.addEventListener("click", () => {
+            searchHolder.hidden = true;
+            navHolder.hidden = false;
+        });
+
+
+    </script>
+
 </div>
 
 </body>

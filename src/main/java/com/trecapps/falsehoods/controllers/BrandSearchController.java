@@ -4,8 +4,11 @@ import com.trecapps.falsehoods.models.BrandComplete;
 import com.trecapps.falsehoods.models.BrandSearchResult;
 import com.trecapps.falsehoods.models.ResourceType;
 import com.trecapps.falsehoods.services.BrandService;
+import com.trecauth.common.model.TrecauthAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +37,17 @@ public class BrandSearchController {
                     boolean hasAccess = false;
                     // ToDo - read the context to determine if requester can create/edit brands
 
+                    Authentication authentication = context.getAuthentication();
 
+                    if(authentication instanceof TrecauthAuthentication tAuth){
+                        hasAccess = !tAuth
+                                .getList()
+                                .getAuthorities()
+                                .stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .filter("RESOURCE_EMPLOYEE"::equals)
+                                .toList().isEmpty();
+                    }
                     // End ToDo
 
                     int cLimit = tempLimit;
@@ -43,7 +56,7 @@ public class BrandSearchController {
                     if(cLimit < 1) cLimit = 1;
 
                     return brandService.searchByBrands(
-                            seekAll && hasAccess,
+                            hasAccess,
                             cLimit,
                             query,
                             resourceType

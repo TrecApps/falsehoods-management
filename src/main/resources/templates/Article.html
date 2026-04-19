@@ -15,170 +15,194 @@
     <link href="styles/falsehood-styles.css" rel="stylesheet" />
     <link href="styles/nav-bar.css" rel="stylesheet" />
     <link href="styles/tc-styles.css" rel="stylesheet" />
+    <link href="styles/article-styles.css" rel="stylesheet" />
 
     <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
 </head>
 <body>
 
-    <div th:replace="~{fragments/topbar :: bar}"></div>
+<div th:replace="~{fragments/topbar :: bar}"></div>
 
-    <div style="height:50px"></div>
-
-
-    <h2>${ brandName }}</h2>
+<div style="height:50px"></div>
 
 
-<!--    <button th:if="${isResourceEmployee}" class="btn btn-info" onclick="setEditingMode()">Edit</button>-->
+<h2 th:text="${brandName}"></h2>
 
-    <button
-            th:if="${isResourceEmployee && reviewStage == 'SUBMITTED'}"
-            class="btn btn-info"
-            onclick="setReviewMode(true)"
-            id="start-review-mode"
-    >Review</button>
+<button
+        th:if="${isResourceEmployee} and (${reviewStage} == 'SUBMITTED')"
+        class="btn btn-info"
 
+        id="start-review-mode"
+>Review</button>
+
+
+<hr>
+
+
+<div th:if="${isResourceEmployee} and (${reviewStage} == 'SUBMITTED')"
+     class="rs-review-pane" id="rs-review-pane">
+    <div class="form-check">
+        <label for="is-approving" class="form-check-label">Approve</label>
+        <input type="checkbox" class="form-check-input" id="is-approving">
+    </div>
+    <div class="form-group">
+        <label>Comment</label>
+        <input type="text" class="form-control" id="comment-input" >
+    </div>
+    <div class="form-group">
+        <button class="btn btn-warning" id="review-cancel-button">Cancel</button>
+        <button class="btn btn-primary" id="review-submit-button">Submit</button>
+    </div>
+</div>
+
+
+<div class="rs-article-container">
+
+
+
+
+    <div class="rs-metadata-container">
+        <div th:if="${brandPic != null}" class="rs-image-container">
+            <div class="rs-image-holder">
+                <img th:src="${brandPic}">
+            </div>
+            <div th:if="${imgDesc != null}" class="rs-image-desc-holder">
+                <p class="rs-image-desc" th:text="${imgDesc}"></p>
+            </div>
+        </div>
+
+        <div class="rs-metadata-holder rs-table-holder">
+            <table>
+                <tr th:each="entry: ${entries}">
+                    <td th:text="${entry.key}"></td>
+                    <td th:text="${entry.value}"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
 
     <hr>
 
+    <div class="rs-article-contents " id="article-contents"></div>
+</div>
 
-    <div th:if="${isResourceEmployee && reviewStage == 'SUBMITTED'}" class="rs-review-pane" id="rs-review-pane">
-        <div class="form-check">
-            <label for="is-approving" class="form-check-label">Approve</label>
-            <input type="checkbox" class="form-check-input" id="is-approving" onchange="updateIsApproving(event)">
-        </div>
-        <div class="form-group">
-            <label>Comment</label>
-            <input type="text" class="form-control" oninput="onCommentInput(event)">
-        </div>
-        <div class="form-group">
-            <button class="btn btn-warning" onclick="setReviewMode(false)">Cancel</button>
-            <button class="btn btn-primary" onclick="submitReview()">Submit</button>
-        </div>
-    </div>
+<div class="bottom-bar"></div>
 
+<script th:inline="javascript">
+    let content = [[${brandContent}]]
+    let brandId = [[${brandId}]]
 
-    <div class="rs-article-container">
+    var falsehoodServiceUrl = [[${falsehoodServiceUrl}]]
 
+    let contentDiv = undefined;
+    let reviewPanel = undefined;
+    let approveCheckbox = undefined;
+    let startReviewButton = undefined;
+    let commentInput = undefined;
 
+    let reviewCancelButton = undefined;
+    let reviewSubmitButton = undefined;
 
+    let isApproving = false;
+    let reviewComment = "";
 
-        <div class="rs-metadata-container">
-            <div th:if="${brandPic != null}" class="rs-image-container">
-                <div class="rs-image-holder">
-                    <img th:src="${brandPic}">
-                </div>
-                <div th:if="${imgDesc != null}" class="rs-image-desc-holder">
-                    <p class="rs-image-desc" th:text="imgDesc"></p>
-                </div>
-            </div>
+    document.addEventListener('DOMContentLoaded', (event) => {
 
-            <div class="rs-metadata-holder rs-table-holder">
-                <table>
-                    <tr th:for="entry: ${entries}">
-                        <td th:text="${entry.key}"></td>
-                        <td th:text="${entry.value}"></td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+        // Set up content
+        contentDiv = document.getElementById("article-contents");
+        contentDiv.innerHTML = marked.parse(content);
 
-        <hr>
+        // Review Panel set up
+        reviewPanel = document.getElementById("rs-review-pane");
+        if(!reviewPanel) return;
+        setReviewMode(false);
 
-        <div class="rs-article-contents " id="article-contents"></div>
-    </div>
+        // set up elements in the review panel
+        approveCheckbox = document.getElementById("is-approving");
+        if(approveCheckbox){
+            approveCheckbox.addEventListener("change", updateIsApproving)
+        }
 
-    <div class="bottom-bar"></div>
+        startReviewButton = document.getElementById("start-review-mode");
+        if(startReviewButton){
+            startReviewButton.addEventListener("click", () => {
+                setReviewMode(true);
+            });
+        }
 
-    <script th:inline="javascript">
-        let content = [[${brandContent}]]
-        let brandId = [[${brandId}]]
+        commentInput = document.getElementById("comment-input");
+        if(commentInput){
+            commentInput.addEventListener("input", onCommentInput);
+        }
 
-        var falsehoodServiceUrl = [[${falsehoodServiceUrl}]]
-
-        let contentDiv = undefined;
-        let reviewPanel = undefined;
-        let approveCheckbox = undefined;
-        let startReviewButton = undefined;
-
-        let isApproving = false;
-        let reviewComment = "";
-
-        document.onload = function(e) {
-
-            // Set up content
-            contentDiv = document.getElementById("article-contents");
-            contentDiv.innerHTML = marked.parse(brandContent);
-
-            // Review Panel set up
-            reviewPanel = document.getElementById("rs-review-pane");
+        reviewCancelButton = document.getElementById("review-cancel-button");
+        reviewSubmitButton = document.getElementById("review-submit-button");
+        reviewCancelButton.addEventListener("click", () => {
             setReviewMode(false);
+        })
+        reviewSubmitButton.addEventListener("click", submitReview)
+    });
 
-            // set up elements in the review panel
-            approveCheckbox = document.getElementById("is-approving");
+    function onCommentInput(e) {
+        reviewComment = e.target.value;
+    }
 
-            startReviewButton = document.getElementById("start-review-mode");
+    function updateIsApproving(e) {
+        isApproving = e.target.checked;
+    }
+
+    function setReviewMode(enteringReviewMode) {
+        if(!reviewPanel) return;
+
+        reviewPanel.style.height = enteringReviewMode ? "auto" : "0";
+
+        if(approveCheckbox){
+            isApproving = approveCheckbox.checked;
         }
+    }
 
-        function onCommentInput(e) {
-            reviewComment = e.target.value;
-        }
+    let submittingReview = false;
 
-        function updateIsApproving(e) {
-            isApproving = e.target.checked;
-        }
+    function submitReview() {
+        if(submittingReview) return;
 
-        function setReviewMode(enteringReviewMode) {
-            if(!reviewPanel) return;
+        submittingReview = true;
 
-            reviewPanel.style.height = enteringReviewMode ? "auto" : "0";
+        fetch(`${falsehoodServiceUrl}/brands-update-api`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    id: brandId,
+                    approve: isApproving,
+                    comment: reviewComment
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }).then(async (response) => {
+                submittingReview = false;
+                let message = "Submitted!";
 
-            if(approveCheckbox){
-                isApproving = approveCheckbox.checked;
-            }
-        }
+                let responseObj = await response.json();
 
-        let submittingReview = false;
+                if(responseObj.message == 'Confirmed'){
+                    message += " Article is now Confirmed!";
 
-        function submitReview() {
-            if(submittingReview) return;
-
-            submittingReview = true;
-
-            fetch(`${falsehoodServiceUrl}/brands-update-api`, {
-                    method: 'PUT',
-                    body: JSON.stringify({
-                        id: brandId,
-                        approve: isApproving,
-                        comment: reviewComment
-                    }),
-                    headers: {
-                        "Content-Type": "application/json"
+                    if(startReviewButton){
+                        startReviewButton.hidden = true;
                     }
-                }).then(async (response) => {
-                    submittingReview = false;
-                    let message = "Submitted!";
+                }
 
-                    let responseObj = await response.json();
+                alert(message);
 
-                    if(responseObj.message == 'Confirmed'){
-                        message += " Article is now Confirmed!";
+                setReviewMode(false);
 
-                        if(startReviewButton){
-                            startReviewButton.hidden = true;
-                        }
-                    }
+            }).catch(() => {
+                submittingReview = false;
+                alert("Failed to submit review!");
+            });
+    }
 
-                    alert(message);
-
-                    setReviewMode(false);
-
-                }).catch(() => {
-                    submittingReview = false;
-                    alert("Failed to submit review!);
-                });
-        }
-
-    </script>
+</script>
 
 </body>
 </html>

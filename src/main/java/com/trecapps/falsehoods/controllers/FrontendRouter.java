@@ -14,6 +14,7 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class FrontendRouter {
@@ -115,7 +117,7 @@ public class FrontendRouter {
 
         Brand brand = new Brand();
         brand.setDefaultLanguage("en-us");
-        brand.setReviewStage(ReviewStage.PRE_SUBMIT);
+//        brand.setReviewStage(ReviewStage.PRE_SUBMIT);
         ret.setMetadata(brand);
 
         BrandContent content = new BrandContent();
@@ -188,15 +190,25 @@ public class FrontendRouter {
             BrandComplete complete = data.getData();
 
             boolean isResourceEmployee = false;
+            if(data.getAccountList() != null){
+                AccountList list = data.getAccountList();
+                isResourceEmployee = list
+                        .getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList()
+                        .contains("RESOURCE_EMPLOYEE");
+            }
             // ToDo - determine if requester has access
 
-            dataMap.put("reviewStage", complete.getMetadata().getReviewStage());
+            dataMap.put("reviewStage", complete.getMetadata().getReviewStage().toString());
             dataMap.put("isResourceEmployee", isResourceEmployee);
             dataMap.put("brandPic", complete.getContent().getImageData());
             dataMap.put("imgDesc", complete.getContent().getImageDescription());
             dataMap.put("entries", complete.getContent().getMetaDataAsEntries());
             dataMap.put("brandContent", complete.getContent().getContent());
             dataMap.put("brandId", id);
+            dataMap.put("brandName", complete.getMetadata().getNames().getFirst());
 
             return ServerResponse.ok().render("Article", dataMap);
         });

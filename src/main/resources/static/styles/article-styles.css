@@ -1,0 +1,107 @@
+.rs-article-container {
+    width: 100%;
+    position: relative;
+}
+
+.rs-review-pane {
+    width: 100%;
+}
+
+.rs-metadata-container {
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%;
+    background-color: black;
+}
+
+.rs-image-container {
+    border-right: solid 1px white;
+    min-width: 320px;
+    max-width: 450px;
+    flex-grow: 1;
+    max-height: 450px;
+    background-color: black;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.rs-image-holder {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+    min-height: 320px;
+    flex-grow: 1;
+}
+
+.rs-image-holder img {
+    object-fit: contain;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.rs-image-desc-holder {
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+
+    width: 100%;
+    padding: 5px;
+}
+
+.rs-image-desc {
+    color: white;
+}
+
+.rs-article-contents {
+    padding:10px;
+}
+
+.rs-table-holder {
+    min-width: 320px;
+    flex-grow: 1;
+    padding: 5px;
+    position: relative;
+
+    display:flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* To-Do: Add Formatting for Tables in both Matadata and Markdown */
+
+.rs-table-holder table {
+    border-collapse: collapse;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #eee;
+    width: 95%;
+
+    /* position: absolute;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%); */
+
+
+}
+
+.rs-table-holder td, .rs-table-holder th {
+    border: solid 1px #aaa;
+    padding: 5px;
+}
+
+.rs-table-holder tr:nth-child(even){
+    background-color: #eee;
+}
+
+.rs-table-holder tr:hover {
+    background-color: #aaa;
+}
+
+.rs-table-holder th {
+    padding: 10px;
+    background-color: #ccc;
+}
