@@ -15,10 +15,6 @@ function initBrandSearcher(brandSearcherId) {
         doSearch();
     }
 
-    function onBrandSelected(id){
-        window.location = `${brandSearchUrl}/Article/${id}`;
-    }
-
     function recalibrateSearchResults(startDate, results){
         // If this search is older than the most recent search, return as it is stale
         if(mostRecentSearch.getTime() > startDate.getTime()) return;
@@ -37,7 +33,7 @@ function initBrandSearcher(brandSearcherId) {
             optionDiv.classList.add("element-item");
             optionDiv.classList.add(itemStyle);
             optionDiv.addEventListener("click", () => {
-                onBrandSelected(result.brand.id)
+                window[`${brandSearcherId}_onBrandSelected`](result.brand.id);
             });
             optionHolder.appendChild(optionDiv);
 

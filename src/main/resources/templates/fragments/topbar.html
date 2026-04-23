@@ -9,13 +9,22 @@
         style="zIndex:35"
         th:classappend="${elementContainerSetting}"
 >
+    <script th:inline="javascript">
+        function topBarOnBrandSelected(id){
+            let url =  [[${falsehoodServiceUrl}]];
+            window.location = `${url}/Article/${id}`;
+        }
+
+        window["topbar_brands_onBrandSelected"] = topBarOnBrandSelected;
+    </script>
+
     <div class="top-bar-child">
         <div class="logo-section">
             <img src="images/Falsehood-icon-Desktop.png">
         </div>
 
         <div class="nav-section" id="search-holder" hidden>
-            <div th:replace="~{fragments/brand-searcher :: brandSearcher('topbar-brands')}"></div>
+            <div th:replace="~{fragments/brand-searcher :: brandSearcher('topbar_brands')}"></div>
             <button class="btn btn-danger" style="width: 50px" id="set-search-off"></button>
         </div>
 
