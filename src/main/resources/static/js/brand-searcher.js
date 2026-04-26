@@ -33,7 +33,7 @@ function initBrandSearcher(brandSearcherId) {
             optionDiv.classList.add("element-item");
             optionDiv.classList.add(itemStyle);
             optionDiv.addEventListener("click", () => {
-                window[`${brandSearcherId}_onBrandSelected`](result.brand.id);
+                window[`${brandSearcherId}_onBrandSelected`](result);
             });
             optionHolder.appendChild(optionDiv);
 

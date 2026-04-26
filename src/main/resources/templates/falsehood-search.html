@@ -22,30 +22,10 @@
 
 <body>
     <div th:replace="~{fragments/topbar :: bar}"></div>
-    <div style="height:50px"></div>
-
-    <div class="container">
-        <div th:class="${elementItemSetting + ' element-item form'">
-            <div th:class="${elementItemSetting + ' element-item form-group'">
-                <label>Culprits</label>
-                <div id="culprit-holder"></div>
-                <div th:replace="~{fragments/brand-searcher :: brandSearcher('culprit-brands')}"></div>
-            </div>
-        </div>
-    </div>
-
 
     <script th:inline="javascript">
-
-        const falsehoodsSeverityOptions = [
-            "OBJECTIVE",                          // The given claim is objectively false
-            "OPPOSING_EVIDENCE_WITHHELD",         // The claim is undermined by evidence hidden from the audience/readers
-            "SUPPORTING_EVIDENCE_WITHHELD",       // There was supporting evidence, but it was withheld
-            "SUBJECTIVE",                         // The given claim uses a standard not consistently used by the person or organization served
-            "NARRATIVE_ISSUE",                    // (MISC - avoid until clear guidance is set)
-            "FAULTY_LOGIC",                       // The logic used to support a narrative is faulty and can be undermined with solid logic
-            "TITLE_OR_SLOGAN"
-        ];
+        var elementItemStyle = [[${elementItemSetting}]]
+        var elementContainerStyle = [[${elementContainerSetting}]]
 
         var searchObject = {
             culprit: null,
@@ -55,7 +35,356 @@
             severity: null
         };
 
+        const falsehoodsSeverityOptions = [
+            {value: "OBJECTIVE", desc: "The claim is objectively false."},
+            {value: "OPPOSING_EVIDENCE_WITHHELD", desc: "The claim is undermined by evidence hidden from the audience/readers"},
+            {value: "SUPPORTING_EVIDENCE_WITHHELD", desc: "Supporting evidence for the claim is not easy to find and the ones making it are not providing it."},
+            {value: "SUBJECTIVE", desc: "The given claim uses a standard not consistently used by the person or organization served"},
+            {value: "NARRATIVE_ISSUE", desc: "There is an issue with the narrative not covered by the other Severity Options"},
+            {value: "FAULTY_LOGIC", desc: "The logic used to support a narrative is faulty and can be undermined with solid logic"},
+            {value: "TITLE_OR_SLOGAN", desc: "The Entire premise of a brand is contradicted by the brand's behavior or conduct"}
+        ];
 
+        function resetSelection(name, field, result){
+            let resultHolder = document.getElementById(name);
+
+            resultHolder.replaceChildren();
+
+            let optionDiv = document.createElement("div");
+            optionDiv.classList.add("brand-option");
+            optionDiv.classList.add("element-item");
+            optionDiv.classList.add(itemStyle);
+            resultHolder.appendChild(optionDiv);
+
+            let imageHolder = document.createElement("div");
+            imageHolder.classList.add("brand-img-holder");
+            optionDiv.appendChild(imageHolder);
+
+            let image = document.createElement("img");
+            image.src = result.image;
+            image.alt = `image of ${result.brand.names[0]}`;
+            imageHolder.appendChild(image);
+
+            let brandHolder = document.createElement("div");
+            brandHolder.classList.add("brand-name-holder");
+            optionDiv.appendChild(brandHolder);
+            let nameText = document.createElement("h5");
+            nameText.classList.add("brand-name");
+            nameText.textContent = result.brand.names[0];
+            brandHolder.appendChild(nameText);
+
+            let removeButton = document.createElement("button");
+            removeButton.classList.add("btn");
+            removeButton.classList.add("btn-danger");
+            removeButton.textContent = "Remove Selection";
+            removeButton.addActionListener("click", () => {
+                resultHolder.replaceChildren();
+                searchObject[field] = null;
+            });
+        }
+
+        function culpritsOnBrandSelected(result){
+            searchObject.culprit = result;
+            resetSelection("culprit-holder", "culprit", result);
+        }
+
+        function targetsOnBrandSelected(result){
+            searchObject.culprit = result;
+            resetSelection("target-holder", "target", result);
+        }
+
+        window["culprit_brands_onBrandSelected"] = culpritsOnBrandSelected;
+        window["target_brands_onBrandSelected"] = targetsOnBrandSelected;
+
+        function severitySelected(e) {
+            let value = e.target.value;
+            let desc = "No Severity Selected";
+            let origDesc = desc;
+
+            for(let severityOption of falsehoodsSeverityOptions){
+                if(value == severityOption.value) {
+                    searchObject.severity = value;
+                    desc = severityOption.desc;
+                    break;
+                }
+            }
+
+            if(desc == origDesc) {
+                searchObject.severity = null;
+            }
+
+            document.findElementById("severity-desc").textContent = desc;
+        }
+    </script>
+    <div style="height:50px"></div>
+
+    <div class="container">
+        <div th:class="${elementContainerSetting + ' element-container form'">
+            <div th:class="${elementItemSetting + ' element-item form-group'">
+                <label>Culprits</label>
+                <div id="culprit-holder"></div>
+                <div th:replace="~{fragments/brand-searcher :: brandSearcher('culprit_brands')}"></div>
+            </div>
+        </div>
+        <div th:class="${elementContainerSetting + ' element-container form'">
+            <div th:class="${elementItemSetting + ' element-item form-group'">
+                <label>Culprits</label>
+                <div id="target-holder"></div>
+                <div th:replace="~{fragments/brand-searcher :: brandSearcher('target_brands')}"></div>
+            </div>
+        </div>
+        <div th:class="${elementContainerSetting + ' element-container form'">
+            <div th:class="${elementItemSetting + ' element-item form-group'">
+                <p id="severity-desc"></p>
+            </div>
+            <div th:class="${elementItemSetting + ' element-item form-group'">
+                <label for="severity-selection" class="form-label">Falsehood Severity</label>
+                    <select id="severity-selection" class="form-select" onchange="severitySelected(e)">
+                        <option value="no_select">No Selection</option>
+                        <option value="OBJECTIVE">Objective Falsehood</option>
+                        <option value="OPPOSING_EVIDENCE_WITHHELD">Opposing Evidence Withheld</option>
+                        <option value="SUPPORTING_EVIDENCE_WITHHELD">Supporting Evidence Withheld</option>
+                        <option value="SUBJECTIVE">Subjective Falsehood</option>
+                        <option value="NARRATIVE_ISSUE">Narrative Issue</option>
+                        <option value="FAULTY_LOGIC">Faulty Logic</option>
+                        <option value="TITLE_OR_SLOGAN">Title or Slogan</option>
+                    </select>
+            </div>
+        </div>
+        <div th:class="${elementContainerSetting + ' element-container form'">
+            <div th:class="${elementItemSetting + ' element-item form-group'">
+                <label for="before-input" class="form-label">Before Date (inclusive)</label>
+                <p id="before-label"></p>
+                <input id="before-input" type="date" class="form-control">
+                <button id="remove-before" class="btn btn-danger">Remove</button>
+            </div>
+            <div th:class="${elementItemSetting + ' element-item form-group'">
+                <label for="after-input" class="form-label">After Date (inclusive)</label>
+                <p id="after-label"></p>
+                <input id="after-input" type="date" class="form-control">
+                <button id="remove-after" class="btn btn-danger">Remove</button>
+            </div>
+        </div>
+
+        <div th:class="${elementContainerSetting + ' element-container form'">
+            <div th:class="${elementItemSetting + ' element-item'">
+                <p id="date-message" hidden class="btn btn-danger">After Date Cannot be before the Before Date</p>
+            </div>
+            <div th:class="${elementItemSetting + ' element-item'">
+                <button class="btn btn-submit" id="do-search">Search</button>
+            </div>
+        </div>
+
+        <div class="search-container" id="search-container" hidden>
+            <p>Showing {{ (currentSize * currentPage) + 1}} - {{ currentSize * (currentPage + 1) }} Falsehoods</p>
+            <div th:class="${elementContainerSetting + ' element-container'" style="width: 100%;" id="result-holder">
+
+            </div>
+            <div class="flex-and-center" style="gap: 10px;margin: 10px;">
+                <!--ToDo: Create stylized buttons-->
+                <button type="button" class="arrow-button" id="back-button" (click)="onSwitchPage(false)"><img src="assets/icons/botton-Arrow-B.png" width="90%" height="90%"/>
+                    Previous</button>
+                <div>
+                    <p style="margin: auto;">Page {{ currentPage + 1 }}</p>
+                </div>
+                <button type="button" class="arrow-button" id="forward-button" [disabled]="currentPage >= falsehoodCollection.length - 1 && !hasMore()" (click)="onSwitchPage(true)">
+                    Next
+                    <img src="assets/icons/botton-Arrow-B.png" width="90%" height="90%" style="transform: rotate(180deg);"/>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+
+    <script th:inline="javascript">
+
+        const falsehoodServiceUrl = [[${falsehoodServiceUrl}]]
+
+        var beforeInput = document.getElementById("before-input");
+        var removeBefore = document.getElementById("remove-before");
+        var afterInput = document.getElementById("after-input");
+        var removeAfter = document.getElementById("remove-after");
+        var dateMessage = document.getElementById("date-message");
+        var doSearch = document.getElementById("do-search");
+
+        function validateDates() {
+
+            if(!searchObject.before || !searchObject.after){
+                dateMessage.hidden = true;
+                doSearch.disabled = false;
+            }
+
+            let beforeDate = new Date(searchObject.before);
+            let afterDate = new Date(searchObject.after);
+
+            if(before < after) {
+                dateMessage.hidden = false;
+                doSearch.disabled = true;
+            }
+        }
+
+        beforeInput.addEventListener("input", (e) => {
+            searchObject.before = e.target.value;
+            validateDates();
+        });
+        removeBefore.addEventListener("input", (e) => {
+            searchObject.before = null;
+            validateDates();
+        });
+        afterInput.addEventListener("input", (e) => {
+            searchObject.after = e.target.value;
+            validateDates();
+        });
+        removeAfter.addEventListener("input", (e) => {
+            searchObject.after = null;
+            validateDates();
+        });
+
+        var page = 0;
+        var size = 20;
+
+        function parseResults(results) {
+            document.getElementById("search-container").hidden = false;
+            let resultHolder = document.getElementById("result-holder");
+            resultHolder.replaceChildren();
+
+            for(let result of results) {
+
+                let resultParent = document.createElement("div");
+                resultParent.classList.add("element-item");
+                resultParent.classList.add(elementItemStyle);
+                resultParent.addEventListener("click", () => {});
+
+                resultHolder.appendChild(resultParent);
+
+                let titleDiv = document.createElement("div");
+                titleDiv.classList.add("flex-and-center");
+                titleDiv.textContent = result.title;
+                resultParent.appendChild(titleDiv);
+
+                resultParent.appendChild(document.createElement("hr"));
+
+                let detailsDiv = document.createElement("div");
+                detailsDiv.style.gap = "5px";
+                detailsDiv.style.flexFlow = "row wrap";
+                resultParent.appendChild(detailsDiv);
+
+                let pElement = document.createElement("p");
+                pElement.innerHTML = `<b>Submitted By: </b>${result.authorDisplayName}`;
+                detailsDiv.appendChild(pElement);
+
+                pElement = document.createElement("p");
+                pElement.innerHTML = `<b>Date: </b>${result.dateMade}`;
+                detailsDiv.appendChild(pElement);
+
+                pElement = document.createElement("p");
+                pElement.innerHTML = `<b>Severity: </b>${result.severity}`;
+                detailsDiv.appendChild(pElement);
+
+                pElement = document.createElement("p");
+                pElement.innerHTML = `<b>Status: </b>${result.status}`;
+                detailsDiv.appendChild(pElement);
+
+                if(results.culprits){
+                    let divBrands = document.createElement("div");
+                    divBrands.style.padding = "5px";
+                    divBrands.style.width = "100%";
+
+                    let b = document.createElement("b");
+                    b.textContent = "Culprits:";
+                    divBrands.appendChild(b);
+
+                    let first = true;
+
+                    for(let culprit of results.culprits) {
+                        let sp = document.createElement("span");
+                        sp.textContent = first ? `${culprits.names[0]}` : `, ${culprits.names[0]}`;
+                        first = false;
+                        divBrands.appendChild(sp);
+                    }
+                    detailsDiv.appendChild(divBrands);
+                }
+
+                if(results.culprits){
+                    let divBrands = document.createElement("div");
+                    divBrands.style.padding = "5px";
+                    divBrands.style.width = "100%";
+
+                    let b = document.createElement("b");
+                    b.textContent = "Culprits:";
+                    divBrands.appendChild(b);
+
+                    let first = true;
+
+                    for(let culprit of results.culprits) {
+                        let sp = document.createElement("span");
+                        sp.textContent = first ? `${culprits.names[0]}` : `, ${culprits.names[0]}`;
+                        first = false;
+                        divBrands.appendChild(sp);
+                    }
+                    detailsDiv.appendChild(divBrands);
+                }
+
+                if(results.targets){
+                    let divBrands = document.createElement("div");
+                    divBrands.style.padding = "5px";
+                    divBrands.style.width = "100%";
+
+                    let b = document.createElement("b");
+                    b.textContent = "Targets:";
+                    divBrands.appendChild(b);
+
+                    let first = true;
+
+                    for(let target of results.targets) {
+                        let sp = document.createElement("span");
+                        sp.textContent = first ? `${target.names[0]}` : `, ${target.names[0]}`;
+                        first = false;
+                        divBrands.appendChild(sp);
+                    }
+                    detailsDiv.appendChild(divBrands);
+                }
+
+
+            }
+
+            document.getElementById("").disabled = page <= 0;
+        }
+
+        function performSearch() {
+
+            const url = new URL(`${falsehoodServiceUrl}/falsehood-search-api`);
+            const params = { page, size };
+
+            // Automatically handles encoding and '?' or '&' symbols
+            url.search = new URLSearchParams(params).toString();
+
+            fetch(url, {
+                method: "POST",
+                body: JSON.stringify(postObject),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }).then(async (response) => {
+                let results = await response.json();
+                parseResults(results);
+            });
+
+
+        }
+
+        doSearch.addEventListener("click", () => {performSearch();});
+
+        function onSwitchPage(forward) {
+            if(forward) {
+                page++;
+            } else {
+                page--;
+            }
+
+            performSearch();
+        }
 
     </script>
 
