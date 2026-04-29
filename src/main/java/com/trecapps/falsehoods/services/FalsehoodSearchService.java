@@ -104,6 +104,8 @@ public class FalsehoodSearchService {
                                 ret1.setCulprits(getBrands(doc.getCulprits(), brandSet));
                                 ret1.setTargets(getBrands(doc.getTargets(), brandSet));
 
+                                ret1.setRecords(doc.getRecords());
+
                                 full.setMetadata(null);
                                 full.setFullMetaData(ret1);
                                 return full;

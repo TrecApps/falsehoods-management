@@ -1,6 +1,7 @@
 package com.trecapps.falsehoods.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.trecauth.common.model.Record;
 import lombok.Data;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -72,4 +73,9 @@ public class FalsehoodRet {
      * The severity of the falsehood
      */
     FalsehoodSeverity severity;
+
+    /**
+     * Records related to the record
+     */
+    List<Record> records;
 }

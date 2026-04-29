@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="title"></title>
+
+    <base th:href="${baseUrl}" />
+    <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
+          crossorigin="anonymous">
+
+    <link href="styles/falsehood-styles.css" rel="stylesheet" />
+    <link href="styles/nav-bar.css" rel="stylesheet" />
+    <link href="styles/tc-styles.css" rel="stylesheet" />
+    <link href="styles/article-styles.css" rel="stylesheet" />
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+</head>
+<body>
+
+    <script th:inline="javascript">
+
+      var falsehood = [[${falsehood}]]
+
+      const canSubEdit = [[${canSubEdit}]]
+      const canEmpEdit = [[${canEmpEdit}]]
+
+      const falsehoodServiceUrl = [[${falsehoodServiceUrl}]]
+
+      var brandsTracker = {
+        targets: falsehood.fullMetaData.targets,
+        culprits: falsehood.fullMetaData.culprits
+      };
+
+      function performPatch(field, value, onSuccess) {
+
+        fetch(`${falsehoodServiceUrl}/falsehood-search-api`, {
+                method: "POST",
+                body: JSON.stringify(postObject),
+                headers: {
+                    "Content-Type": "application/json"
+                }).then(async (response) => {
+
+                    let responseObj = await response.json();
+                    if(responseObj.status == 200){
+                        onSuccess();
+                    }
+
+                });
+
+      }
+
+        function updateBrandElementList(which){
+            let listHolder = document.getElementById(`${which}-list`);
+
+            listHolder.replaceChildren();
+
+            let curList = brandsTracker[which];
+
+            for(let brand of curList){
+
+                let brandDiv = document.createElement("div");
+                brandDiv.classList.add("brand-option");
+                curList.appendChild(brandDiv);
+
+                let nameP = document.createElement("p");
+                nameP.textContent = brand.names[0];
+                brandDiv.appendChild(nameP);
+
+                if(canSubEdit || canEmpEdit) {
+                    let removeDiv = document.createElement("div");
+                    removeDiv.textContent = "(X)";
+                    removeDiv.addEventListener("click", () => {
+
+                        performPatch(`${which}-remove`, brand.id, () => {
+
+                            falsehood.fullMetaData[which] = falsehood.fullMetaData[which].filter((b) => b != brand.id);
+                            brandsTracker[which] = falsehood.fullMetaData[which];
+                            updateBrandElementList(which);
+
+                        });
+
+                    });
+                    brandDiv.appendChild(removeDiv);
+                }
+
+            }
+        }
+
+        function culpritsOnBrandSelected(result){
+
+            let which = "culprits";
+
+            performPatch(which, result.brand.id, () => {
+                falsehood.fullMetaData[which].add(result);
+                brandsTracker[which] = falsehood.fullMetaData[which];
+                updateBrandElementList(which);
+            });
+        }
+
+        function targetsOnBrandSelected(result){
+            let which = "targets";
+
+            performPatch(which, result.brand.id, () => {
+                falsehood.fullMetaData[which].add(result);
+                brandsTracker[which] = falsehood.fullMetaData[which];
+                updateBrandElementList(which);
+            });
+        }
+
+
+        window["culprit_brands_onBrandSelected"] = culpritsOnBrandSelected;
+        window["target_brands_onBrandSelected"] = targetsOnBrandSelected;
+
+        function updateDate() {
+
+            performPatch("dateMade", falsehood.fullMetaData.dateMade, () => {});
+
+        }
+
+        function toggleSeverityEdit(e) {
+            let severityGroup = document.getElementById("severity-group");
+
+            let button = e.target;
+        }
+
+
+
+        function refreshContentDiv() {
+            let content = "";
+            let contentDetails = falsehood.fullMetaData.content;
+            if(contentDetails && contentDetails.length){
+                content = contentDetails[contentDetails.length - 1].contents;
+            }
+            document.getElementById("content-md").innerHTML = marked.parse(content);
+        }
+
+
+    </script>
+
+    <div th:replace="~{fragments/topbar :: bar}"></div>
+
+    <div class="container">
+      <nav class="rs-nav-bar navbar navbar-expand-lg">
+        <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#factcheckNavCollapse" aria-controls="factcheckNavCollapse" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="factcheckNavCollapse">
+          <ul class="navbar-nav">
+            <li class="nav-item"><p class="nav-link" id="nav-details">Details</p></li>
+            <li class="nav-item"><p class="nav-link" id="nav-records">Records</p></li>
+            <li class="nav-item"><p class="nav-link" id="nav-content">Content</p></li>
+            <li class="nav-item"><p class="nav-link" id="nav-briefs">Briefs</p></li>
+          </ul>
+        </div>
+      </nav>
+
+
+      <form th:class="${elementContainerSetting + ' element-container form'" id="pane-details">
+        <div th:class="${elementItemSetting + ' element-item form-group'">
+          <label class="form-label" style="width: 100%; text-align: center" th:text="Status: ${falsehood.fullMetaData.status}"></label>
+
+          <button th:if="canReview" type="button"
+                  id="review-start-button"
+                  class="btn btn-primary"
+                  (click)="prepReview()"
+          >Review</button>
+          <button th:if="canAppeal" type="button"
+                  class="btn btn-primary"
+                  (click)="isAppealing = true"
+          >Appeal</button>
+          <button th:if="canSubmit" type="button"
+                  class="btn btn-primary"
+                  (click)="makeSubmitted()"
+          >Submit</button>
+        </div>
+
+        <div th:class="${elementItemSetting + ' element-item form-group'">
+          <label class="form-label">Title</label>
+          <p th:if="!canSubEdit && !canEmpEdit" th:text="falsehood.fullMetaData.title"></p>
+
+
+          <input th:if="canSubEdit || canEmpEdit"
+                 id="title-input"
+                  class="form-control"
+                  name="title"
+          >
+
+
+          <button type="button" id="title-submit" class="btn btn-primary" hidden>Update Title</button>
+
+        </div>
+
+        <div th:class="${elementItemSetting + ' element-item form-group'">
+          <label>Culprits</label>
+
+          <div th:if="canSubEdit || canEmpEdit" th:replace="~{fragments/brand-searcher :: brandSearcher('culprit_brands')}"></div>
+          <div id="culprits-list"></div>
+
+        </div>
+        <div th:class="${elementItemSetting + ' element-item form-group'">
+          <label>Targets</label>
+
+          <div th:if="canSubEdit || canEmpEdit" th:replace="~{fragments/brand-searcher :: brandSearcher('target_brands')}"></div>
+          <div id="targets-list"></div>
+
+        </div>
+        <div th:class="${elementItemSetting + ' element-item form-group'">
+          <label>Date Made</label>
+          <p th:text="${falsehood.fullMetaData.dateMade}" id="current-date-made"></p>
+          <div th:if="canSubEdit">
+
+
+            <button id="do-date-edit" type="button" class="btn btn-primary">Edit Date</button>
+            <div id="date-group" hidden>
+              <label class="form-check-label" for="date-check">Use Date</label>
+              <input id="date-check" type="checkbox" class="form-check-input" name="useDate">
+
+              <label class="form-check-label" for="date-control">Use Date</label>
+              <input id="date-control" type="date" name="date">
+              <button id="date-submit" type="button" class="btn btn-light" onclick="updateDate()">Update Date</button>
+            </div>
+
+
+          </div>
+
+        </div>
+
+          <div th:class="${elementItemSetting + ' element-item form-group'">
+            <label for="severity-select">Severity</label>
+            <p th:text="${falsehood.fullMetaData.severity}"></p>
+              @if (()) {
+              <div th:if="canSubEdit || canEmpEdit">
+
+                  <button id="severity-toggle" type="button" class="btn btn-primary">Edit Severity</button>
+
+                  <div id="severity-group" hidden>
+                      <select id="severity-select" class="form-select" name="severity">
+                          <option value="OBJECTIVE">Objective</option>
+                          <option value="OPPOSING_EVIDENCE_WITHHELD">Opposing Evidence Withheld</option>
+                          <option value="SUPPORTING_EVIDENCE_WITHHELD">Supporting Evidence Withheld</option>
+                          <option value="SUBJECTIVE">Double Standard</option>
+                          <option value="FAULTY_LOGIC">Faulty Logic</option>
+                          <option value="NARRATIVE_ISSUE">Misleading Narrative</option>
+                          <option value="TITLE_OR_SLOGAN">Misleading Title/Slogan</option>
+                      </select>
+                      <button
+                          hidden
+                          id="severity-submit"
+                          type="button"
+                          class="btn btn-light"
+                  >Update Severity</button>
+                  </div>
+
+
+              </div>
+          </div>
+          <div th:class="${elementItemSetting + ' element-item form-group'">
+            <label>Notes</label>
+
+              <p id="note-p" th:text="${Falsehood.fullMetaData.notes}"></p>
+
+          </div>
+      </form>
+
+      <div th:class="${elementContainerSetting + ' element-container'" id="pane-records" hidden>
+          <div th:each="record: ${falsehood.fullMetaData.records}" th:class="${elementItemSetting + ' element-item'">
+              <p><b>By: </b><span th:text="${record.creator}"></span></p>
+              <p><b>Made: </b><span th:text="${record.made}"></span></p>
+              <p><b>Event: </b><span th:text="${record.type}"></span></p>
+              <p><b>Notes: </b></p>
+              <p th:each="message: ${record.messages}">
+                  <span th:text="${message}"></span>
+              </p>
+          </div>
+      </div>
+
+      <div th:class="${elementContainerSetting + ' element-container'" id="pane-content" hidden>
+          <h3>Explanation</h3>
+          <div th:if="canSubEdit">
+
+              <button id="content-toggle-edit" type="button" class="btn btn-primary" (click)="editingContent = true">Edit Explanation</button>
+
+              <div id="content-editor-holder" hidden>
+                  <div th:replace="~{fragments/markdown-editor :: markdownEditor('contentEditor', falsehood.fullMetaData.content[falsehood.fullMetaData.content.size() - 1])}"></div>
+                  <button id="update-content-submit" type="button" class="btn btn-light" (click)="updateContent()">Update Explanation</button>
+              </div>
+
+
+          </div>
+          <div id="content-md" class="md-preview-side"></div>
+
+      </div>
+
+      <div th:class="${elementContainerSetting + ' element-container'" id="pane-briefs" hidden>
+
+      </div>
+
+
+    </div>
+
+    <script th:inline="javascript">
+        const detailsNav = document.getElementById("nav-details");
+        const recordsNav = document.getElementById("nav-records");
+        const contentNav = document.getElementById("nav-content");
+        const briefsNav = document.getElementById("nav-briefs");
+
+        const detailsPane = document.getElementById("pane-details");
+        const recordsPane = document.getElementById("pane-records");
+        const contentPane = document.getElementById("pane-content");
+        const briefsPane = document.getElementById("pane-briefs");
+
+        detailsNav.addEventListener("click", () => {
+          detailsPane.hidden = false;
+          contentPane.hidden = true;
+          briefsPane.hidden = true;
+          recordsPane.hidden = true;
+        });
+        contentNav.addEventListener("click", () => {
+          detailsPane.hidden = true;
+          contentPane.hidden = false;
+          briefsPane.hidden = true;
+          recordsPane.hidden = true;
+        });
+        briefsNav.addEventListener("click", () => {
+          detailsPane.hidden = true;
+          contentPane.hidden = true;
+          briefsPane.hidden = false;
+          recordsPane.hidden = true;
+        });
+        recordsNav.addEventListener("click", () => {
+          detailsPane.hidden = true;
+          contentPane.hidden = true;
+          briefsPane.hidden = true;
+          recordsPane.hidden = false;
+        });
+
+
+
+        // Title management
+        var title = falsehood.fullMetaData.title;
+        var titleInput = document.getElementById("title-input");
+        var titleSubmit = document.getElementById("title-submit");
+
+        function assessTitleDifference() {
+          let tempTitle = title.trim();
+          titleSubmit.hidden = !(tempTitle.length && (tempTitle != falsehood.fullMetaData.title))
+        }
+
+        if(titleInput){
+          titleInput.addEventListener("input", (e) => {
+            title = e.target.value;
+            assessTitleDifference();
+          });
+        }
+
+        titleSubmit.addEventListener("click", () => {
+
+          performPatch("title", title.trim(), () => {
+            falsehoods.fullMetaData.title = title.trim();
+            assessTitleDifference();
+          }
+
+        });
+
+        // Date Management
+
+        var currentDateMade = document.getElementById("current-date-made");
+        var dateMade = falsehood.fullMetaData.dateMade;
+        var dateControl = document.getElementById("date-control");
+        var dateCheck = document.getElementById("date-check");
+        var dateEditButton = document.getElementById("do-date-edit");
+
+
+        function prepDates() {
+
+            if(!dateControl || !dateCheck || !dateEditButton) return;
+
+            dateControl.addEventListener("change", (e) => {
+
+                falsehood.fullMetaData.dateMade = e.target.value;
+
+            });
+
+            dateCheck.addEventListener("change", (e) => {
+                dateControl.hidden = !dateCheck.checked;
+
+                if(dateControl.hidden) {
+                    dateMade = falsehood.fullMetaData.dateMade;
+                } else {
+                    falsehood.fullMetaData.dateMade = dateMade;
+                }
+
+            });
+
+            dateControl.hidden = !dateCheck.checked;
+
+            dateEditButton.addEventListener("click", () => {
+
+                let dateGroup = document.getElementById("date-group");
+
+                if(dateGroup.hidden) {
+                    dateGroup.hidden = false;
+                    dateEditButton.classList.remove("btn-primary");
+                    dateEditButton.classList.add("btn-danger");
+                } else {
+                    dateGroup.hidden = true;
+                    dateEditButton.classList.remove("btn-danger");
+                    dateEditButton.classList.add("btn-primary");
+                }
+
+
+            });
+
+
+        }
+
+        prepDates();
+
+        // Severity Management
+
+        var severityGroup = document.getElementById("severity-group");
+        var severityToggleButton = document.getElementById("severity-toggle");
+        var severitySelect = document.getElementById("severity-select");
+        var severitySubmit = document.getElementById("severity-submit");
+
+        function prepSeverity() {
+
+            if(!severityGroup || !severityToggleButton || !severitySelect) return;
+
+            severityToggleButton.addEventListener("click", (e) => {
+
+                if(severityGroup.hidden){
+                    e.target.classList.remove("btn-primary");
+                    e.target.classList.add("btn-danger");
+                } else {
+                    e.target.classList.remove("btn-danger");
+                    e.target.classList.add("btn-primary");
+                }
+                severityGroup.hidden = !severityGroup.hidden;
+            });
+
+            severitySelect.addEventListener("change", (e) => {
+                severitySubmit.hidden = false;
+                falsehood.fullMetaData.severity = e.target.value;
+            });
+
+            severitySubmit.addEventListener("click", () => {
+
+                performPatch("severity", falsehood.fullMetaData.severity, () => {
+                    severitySubmit.hidden = true;
+                }
+
+            });
+
+        }
+
+
+        // Content Management
+        var contentToggleEdit = document.getElementById("content-toggle-edit");
+        var contentEditorHolder = document.getElementById("content-editor-holder");
+        var updateContentSubmit = document.getElementById("update-content-submit");
+        var contentMd = document.getElementById("content-md");
+
+        function prepContent() {
+
+            if(!contentToggleEdit || !contentEditorHolder || !updateContentSubmit) return;
+
+            function toggleContentEdit() {
+                if(contentMd.hidden) {
+                    let content =  window['contentEditor_content'];
+                    document.getElementById("content-md").innerHTML = marked.parse(content);
+
+                    contentToggleEdit.classList.remove("btn-danger");
+                    contentToggleEdit.classList.add("btn-primary");
+                } else {
+                    contentToggleEdit.classList.remove("btn-primary");
+                    contentToggleEdit.classList.add("btn-danger");
+                }
+
+                contentMd.hidden = !contentMd.hidden;
+            }
+
+
+            contentToggleEdit.addEventListener("click", () => {
+                toggleContentEdit();
+            });
+
+            updateContentSubmit.addEventListener("click", () => {
+
+                performPatch("content", window['contentEditor_content'], () => {
+                    let contentDetails = falsehood.fullMetaData.content;
+                    if(contentDetails && contentDetails.length){
+                        contentDetails[contentDetails.length - 1].contents = window['contentEditor_content'];
+                    }
+
+                    toggleContentEdit();
+                    refreshContentDiv();
+                });
+
+            })
+        }
+
+        prepContent();
+    </script>
+</body>
+</html>
