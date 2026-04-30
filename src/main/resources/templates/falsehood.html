@@ -27,6 +27,9 @@
       const canSubEdit = [[${canSubEdit}]]
       const canEmpEdit = [[${canEmpEdit}]]
 
+      var elementItemStyle = [[${elementItemSetting}]]
+      var elementContainerStyle = [[${elementContainerSetting}]]
+
       const falsehoodServiceUrl = [[${falsehoodServiceUrl}]]
 
       var brandsTracker = {
@@ -135,6 +138,162 @@
                 content = contentDetails[contentDetails.length - 1].contents;
             }
             document.getElementById("content-md").innerHTML = marked.parse(content);
+        }
+
+        // Brief Management
+
+        function setEditingBrief(doEdit) {
+
+            document.getElementById("submit-brief-button").hidden = doEdit;
+            document.getElementById().hidden = !doEdit;
+        }
+
+        var briefPurpose = "AFFIRM";
+
+        var briefId = undefined;
+        var briefTempContent = "";
+
+        function submitBriefChanges(onSuccess) {
+
+            fetch(`${falsehoodServiceUrl}/Brief/${falsehood.fullMetaData.id}/${briefId}`, {
+                method: "PUT",
+                body: window['briefEditor_content'],
+                headers: {
+                    "Content-Type": "text/plain"
+                }
+            }).then(async (response) => {
+
+                let responseObj = await response.json();
+
+                document.getElementById(`brief-${briefId}`).innerHTML = marked.parse(window['briefEditor_content']);
+
+                onSuccess();
+
+            });
+
+        }
+
+        function submitNewBrief(onSuccess) {
+
+            let body = {
+                    type: briefPurpose,
+                    content: window['briefEditor_content']
+                };
+
+            fetch(`${falsehoodServiceUrl}/Brief/${falsehood.fullMetaData.id}`, {
+                method: "POST",
+                body: JSON.stringify(body),
+                headers: {
+                    "Content-Type": "application/json"
+                }).then(async (response) => {
+
+                    let responseObj = await response.json();
+
+                    let briefId = responseObj.id;
+                    if(briefId) {
+                        let brief = {
+                            displayName: user.displayName,
+                            uAccount: user.id,
+                            id: briefId,
+                            purpose: briefPurpose,
+                            content: [{
+                                contents: body.content
+                            }]
+                        };
+
+                        document.getElementById("brief-container").appendChild(generateBriefElement(brief));
+
+                    }
+
+                    onSuccess();
+                });
+
+        }
+
+        function onSubmit(){
+
+            let onSuccess = () => {
+                initMarkdownEditor("briefEditor", briefTempContent);
+
+                briefId = undefined;
+                briefTempContent = "";
+
+                setEditingBrief(false);
+
+            };
+
+            if(briefId) {
+                submitBriefChanges(onSuccess);
+            } else {
+                submitNewBrief(onSuccess);
+            }
+
+        }
+
+         function generateBriefElement(brief) {
+            let ret = document.createElement("div");
+            ret.classList.add("element-item");
+            ret.classList.add(elementItemStyle);
+
+            let briefComponent = document.createElement("div");
+            briefComponent.classList.add("element-container");
+            briefComponent.classList.add(elementContainerStyle);
+            ret.appendChild(briefComponent);
+
+            let submitterDiv = document.createElement("div");
+            submitterDiv.classList.add("element-item");
+            submitterDiv.classList.add(elementItemStyle);
+            submitterDiv.style.display = "flex";
+            let submitterP = document.createElement("p");
+            submitterP.innerHTML = `<b>Submitter: </b>${ brief.displayName }`;
+            submitterDiv.appendChild(submitterP);
+            ret.appendChild(submitterDiv);
+
+            if(user?.id == brief.uAccount){
+                let editButton = document.createElement("button");
+                editButton.id = `edit-brief-${brief.id}`;
+                editButton.value = brief.id;
+                editButton.classList.add("btn");
+                editButton.classList.add("btn-primary");
+
+                editButton.addActionListener("click", (e) => {
+                    briefId = editButton.value;
+                    briefTempContent = window['briefEditor_content'];
+                    window['briefEditor_content'] = brief.content[brief.content.length - 1].contents;
+
+                    initMarkdownEditor("briefEditor", window['briefEditor_content']);
+
+                    setEditingBrief(true);
+
+                });
+                submitterDiv.appendChild(editButton);
+            }
+
+            submitterDiv = document.createElement("div");
+            submitterDiv.classList.add("element-item");
+            submitterDiv.classList.add(elementItemStyle);
+            let submitterP = document.createElement("p");
+            submitterP.innerHTML = `<b>Type: </b>${ brief.purpose }`;
+            submitterDiv.appendChild(submitterP);
+            ret.appendChild(submitterDiv);
+
+            submitterDiv = document.createElement("div");
+            submitterDiv.classList.add("element-item");
+            submitterDiv.classList.add(elementItemStyle);
+            let submitterP = document.createElement("p");
+            submitterP.innerHTML = `<b>Added: </b>${ brief.created }`;
+            submitterDiv.appendChild(submitterP);
+            ret.appendChild(submitterDiv);
+
+            submitterDiv = document.createElement("div");
+            submitterDiv.classList.add("element-item");
+            submitterDiv.classList.add(elementItemStyle);
+            let markdownDiv = document.createElement("div");
+            markdownDiv.classList.add("md-preview-side");
+            markdownDiv.id = `brief-${brief.id}`
+            markdownDiv.innerHTML = marked.parse(brief.content[brief.content.length - 1].contents);
+
+            return ret;
         }
 
 
@@ -281,11 +440,11 @@
           <h3>Explanation</h3>
           <div th:if="canSubEdit">
 
-              <button id="content-toggle-edit" type="button" class="btn btn-primary" (click)="editingContent = true">Edit Explanation</button>
+              <button id="content-toggle-edit" type="button" class="btn btn-primary" >Edit Explanation</button>
 
               <div id="content-editor-holder" hidden>
                   <div th:replace="~{fragments/markdown-editor :: markdownEditor('contentEditor', falsehood.fullMetaData.content[falsehood.fullMetaData.content.size() - 1])}"></div>
-                  <button id="update-content-submit" type="button" class="btn btn-light" (click)="updateContent()">Update Explanation</button>
+                  <button id="update-content-submit" type="button" class="btn btn-light">Update Explanation</button>
               </div>
 
 
@@ -296,12 +455,34 @@
 
       <div th:class="${elementContainerSetting + ' element-container'" id="pane-briefs" hidden>
 
+          <button th:if="canAddBrief && isAccepted" id="submit-brief-button" type="button" class="btn btn-primary" onclick="setEditingBrief(true)">Submit Brief</button>
+
+
+          <div id="adding-brief-div" hidden>
+              <select class="form-select" name="purpose" id="brief-select-purpose">
+                  <option value="AFFIRM">Affirm (you support Confirmation)</option>
+                  <option value="OPPOSE">Oppose (you oppose Confirmation)</option>
+                  <option value="SUGGEST">Suggest</option>
+              </select>
+              <div th:replace="~{fragments/markdown-editor :: markdownEditor('briefEditor', ''}"></div>
+              <button type="button" class="btn btn-danger" onclick="setEditingBrief(false)">Cancel</button>
+              <button type="button" class="btn btn-primary" onclick="submitBrief()">Submit</button>
+          </div>
+
+          <hr>
+          <div th:class="${elementContainerSetting + ' element-container'" id="brief-container">
+
+          </div>
       </div>
 
 
     </div>
 
     <script th:inline="javascript">
+
+
+
+
         const detailsNav = document.getElementById("nav-details");
         const recordsNav = document.getElementById("nav-records");
         const contentNav = document.getElementById("nav-content");
@@ -504,6 +685,15 @@
         }
 
         prepContent();
+
+        // Brief Management
+        let briefSelectPurpose = document.getElementById("brief-select-purpose");
+        briefSelectPurpose.value = briefPurpose;
+
+        briefSelectPurpose.addEventListener("change", (e) => {
+            briefPurpose = e.target.value;
+        });
+
     </script>
 </body>
 </html>

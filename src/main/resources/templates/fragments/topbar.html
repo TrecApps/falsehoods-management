@@ -10,6 +10,9 @@
         th:classappend="${elementContainerSetting}"
 >
     <script th:inline="javascript">
+
+        var user = [[${user}]]
+
         function topBarOnBrandSelected(result){
             let url =  [[${falsehoodServiceUrl}]];
             window.location = `${url}/Article/${result.brand.id}`;
