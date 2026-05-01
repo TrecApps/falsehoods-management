@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--/* Up-Slider fragment
+       Parameters:
+         sliderId      - String, required. Applied as the id attribute of the container div.
+         zIndex        - int, default 10. Applied as z-index inline style.
+         topBarContent - String, optional. Plain-text label rendered in the top bar.
+*/-->
+<div th:fragment="upSlider(sliderId, zIndex, topBarContent, sliderBody)"
+     th:id="${sliderId}"
+     class="container-slider container-slider-collapse"
+     th:style="'z-index: ' + ${zIndex} + ';'">
+
+    <div class="slider-top-bar">
+        <div class="slider-top-bar-buffer" th:text="${topBarContent}"></div>
+        <div class="red-button-container">
+            <button th:attr="onclick=|hideSlider('__${sliderId}__')|">
+                <img th:src="@{/images/X-image.png}" alt="exit button">
+            </button>
+        </div>
+    </div>
+
+    <div th:replace="${sliderBody}"></div>
+
+</div>
+
+</body>
+</html>
