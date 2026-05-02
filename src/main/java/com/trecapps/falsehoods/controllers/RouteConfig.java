@@ -51,6 +51,7 @@ public class RouteConfig implements WebFluxConfigurer
                 .GET("/ArticleEdit/{id}", frontendRouter::articleEditPage)
                 .GET("/FalsehoodSearch", falsehoodsRouter::falsehoodSearchPage)
                 .GET("/Falsehood/{id}", falsehoodsRouter::falsehoodPage)
+                .GET("/FalsehoodSubmit", falsehoodsRouter::falsehoodSubmitPage)
                 .build();
     }
 

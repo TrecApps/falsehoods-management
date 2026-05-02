@@ -77,6 +77,15 @@ public class FalsehoodsRouter extends BaseRouter{
         });
     }
 
+    public Mono<ServerResponse> falsehoodSubmitPage(ServerRequest request){
+        Mono<FrontendData<Object>> thData = this.prepareData();
+
+        return thData.flatMap((FrontendData<Object> data) -> {
+            Map<String, Object> dataMap = getDataMap(data);
+            return ServerResponse.ok().render("falsehood-submit", dataMap);
+        });
+    }
+
     private boolean canReview(FalsehoodFull currentFalsehood, AccountList list){
         if( list == null) return false;
         UserAccount user = list.getMainUserAccount();

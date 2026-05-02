@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <base th:href="${baseUrl}" />
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
+            crossorigin="anonymous">
+
+    <link href="styles/falsehood-styles.css" rel="stylesheet" />
+    <link href="styles/nav-bar.css" rel="stylesheet" />
+    <link href="styles/tc-styles.css" rel="stylesheet" />
+    <link href="styles/article-styles.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+
+</head>
+<body>
+    <script th:inline="javascript">
+        var title = "";
+        var severity = undefined;
+        var culprits = [];
+        var targets = [];
+        var dateMade = undefined;
+        var useDate = false;
+        var dateOkay = false;
+        var notes = "";
+
+        function submitReady() {
+            let ready = title.trim().length > 0 && severity != undefined && dateOkay && window['contentEditor_content'].trim().length > 0
+
+            document.getElementById("button-save").disabled = !ready;
+            document.getElementById("button-submit").disabled = !ready;
+        }
+
+        function resetBrandList(elementId, values) {
+            let brandHolder = document.getElementById(elementId);
+            let noneSpan = document.getElementById(`${elementId}-span`);
+
+            brandHolder.replaceChildren();
+            if(values.length == 0) {
+                noneSpan.hidden = false;
+                return;
+            }
+            noneSpan.hidden = true;
+
+
+            for(let brandIndex in values) {
+
+                let brand = values[brandIndex];
+
+                let brandOption = document.createElement("div");
+                brandOption.classList.add("brand-option");
+                brandHolder.appendChild(brandOption);
+
+                let brandImgHolder = document.createElement("div");
+                brandImgHolder.classList.add("brand-img-holder");
+                brandHolder.appendChild(brandImgHolder);
+
+                let brandImg = document.createElement("img");
+                brandImg.src = brand.imgData || "images/none.png";
+                brandImgHolder.appendChild(brandImg);
+
+                let brandNameHolder = document.createElement("div");
+                brandNameHolder.innerHTML = `<h5 class="brand-name">${ culprit.brandInfo.name }</h5>`
+                brandHolder.appendChild(brandNameHolder);
+
+                let removeDiv = document.createElement("div");
+                removeDiv.addEventListener("click", () => {
+                    values.splice(bandIndex, 1);
+                    resetBrandList(elementId, values);
+                })
+                removeDiv.textContent = "(X)";
+                brandHolder.appendChild(removeDiv);
+
+            }
+        }
+
+        function culpritsOnBrandSelected(result){
+            culprits.push(result);
+            resetBrandList("culprits-list", culprits);
+        }
+
+        function targetsOnBrandSelected(result){
+            targets.push(result);
+            resetBrandList("targets-list", targets);
+        }
+
+        window["culprit_brands_onBrandSelected"] = culpritsOnBrandSelected;
+        window["target_brands_onBrandSelected"] = culpritsOnBrandSelected;
+
+        function setTitle(e) {
+            title = e.target.value;
+            submitReady();
+        }
+
+        function setSeverity(e) {
+            severity = e.target.value;
+            submitReady();
+        }
+
+        function calibrateDateInfo(){
+            dateOkay = useDate || severity == "TITLE_OR_SLOGAN"
+
+            document.getElementById("date-issue").hidden = dateOkay;
+            document.getElementById("remove-date-button").disabled = !useDate;
+        }
+
+        function setDate(e) {
+            useDate = true;
+            dateMade = e.target.value;
+            calibrateDateInfo();
+        }
+
+        function removeDate() {
+            useDate = false;
+            calibrateDateInfo();
+        }
+
+        function setNotes(e) {
+            notes = e.target.value;
+        }
+
+        function submitFalsehood(isSubmitting) {
+
+            const url = new URL(`${falsehoodServiceUrl}/Falsehood-api`);
+            const params = { "doSubmit": isSubmitting };
+
+            // Automatically handles encoding and '?' or '&' symbols
+            url.search = new URLSearchParams(params).toString();
+
+            let body = {
+                culprits,
+                targets,
+                dateMade,
+                severity,
+                title,
+                content: window['contentEditor_content'],
+                notes,
+                showRegularAccount: true
+            }
+
+            fetch(url, {
+                method: "POST",
+                body: JSON.stringify(postObject),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }).then(async (response) => {
+                let responseObj = await response.json();
+                if(responseObj.status == 201) {
+                    window.location = `${falsehoodServiceUrl}/Falsehood/${responseObj.id}`;
+                } else {
+                    // handle
+
+                }
+            });
+
+        }
+
+
+    </script>
+    <div th:replace="~{fragments/topbar :: bar}"></div>
+    <div style="height:50px"></div>
+
+    <div class="container">
+        <form th:class="${elementContainerSetting} + ' element-container form'" >
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
+                <label for="input-title" class="form-label">Title</label>
+                <input id="input-title" class="form-control" oninput="setTitle(event)" name="title">
+            </div>
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
+                <label for="select-severity" class="form-label">Severity</label>
+                <select id="select-severity" class="form-select" onchange="setSeverity(event)" name="severity">
+                    <option value="OBJECTIVE">Objective</option>
+                    <option value="OPPOSING_EVIDENCE_WITHHELD">Opposing Evidence Withheld</option>
+                    <option value="SUPPORTING_EVIDENCE_WITHHELD">Supporting Evidence Withheld</option>
+                    <option value="SUBJECTIVE">Double Standard</option>
+                    <option value="FAULTY_LOGIC">Faulty Logic</option>
+                    <option value="NARRATIVE_ISSUE">Misleading Narrative</option>
+                    <option value="TITLE_OR_SLOGAN">Misleading Title/Slogan</option>
+                </select>
+            </div>
+
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
+                <label class="form-label">Culprits
+                    <span id="culprits-list-span">: None Selected</span>
+                </label>
+                <div id="culprits-list">
+                </div>
+                <div th:replace="~{fragments/brand-searcher :: brandSearcher('culprit_brands')}"></div>
+            </div>
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
+                <label class="form-label">Culprits
+                    <span id="targets-list-span">: None Selected</span>
+                </label>
+                <div id="targets-list">
+                </div>
+                <div th:replace="~{fragments/brand-searcher :: brandSearcher('target_brands')}"></div>
+            </div>
+
+
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
+                <label for="input-date" class="form-label">Date Made</label>
+                <input id="input-date" class="form-control" type="date" onchange="setDate(event)" name="dateMade">
+                <button id="remove-date-button" type="button" class="btn btn-danger" onclick="removeDate()" disabled>Remove Date</button>
+
+                <p id="date-issue">The severity is not set to Title/Slogan - a date must be provided</p>
+
+            </div>
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
+                <label class="form-label">Content</label>
+                <div th:replace="~{fragments/markdown-editor :: markdownEditor('contentEditor', '')}"></div>
+            </div>
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
+                <label for="input-notes" class="form-label">Notes</label>
+                <textarea id="input-notes" class="form-control" oninput="setNotes(event)" name="notes"></textarea>
+            </div>
+            <button id="button-save" type="button" class="btn btn-white" disabled (click)="submitFalsehood(false)">Save</button>
+            <button id="button-submit" type="button" class="btn btn-primary" disabled (click)="submitFalsehood(true)">Submit</button>
+        </form>
+    </div>
+
+</body>
+</html>
