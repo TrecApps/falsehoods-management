@@ -18,6 +18,8 @@
     <link href="styles/up-slider.css" rel="stylesheet" />
 
     <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+
+    <script src="js/up-slider.js" defer></script>
 </head>
 <body>
 
@@ -344,7 +346,39 @@
 
         }
 
+        // Appeal Management
+        var appealComment = "";
+        function evaluateAppealParams(){
+            document.getELementById('submit-appeal').disabled = appealComment.trim().length == 0;
+        }
 
+
+        function setAppealComment(e) {
+            appealComment = e.target.value;
+        }
+
+        function submitAppeal(){
+
+            let appealLevel = falsehood.fullMetaData.status == "REJECTED" ? 1 : 2;
+
+            fetch(`${falsehoodServiceUrl}/falsehood-review-api/appeal-${appealLevel}`, {
+                method: "POST",
+                body: appealComment,
+                headers: {
+                    "Content-Type": "plain/text"
+                }
+            }).then(async(response) => {
+                window.location.reload();
+            });
+        }
+
+        // Make Submitted
+
+        function makeSubmitted(){
+            fetch(`${falsehoodServiceUrl}/Falsehood-api/submit/${falsehood.fullMetaData.id}`, {
+                method: "GET"
+            }).then(() => window.location.reload())
+        }
 
 
     </script>
@@ -367,31 +401,31 @@
       </nav>
 
 
-      <form th:class="${elementContainerSetting + ' element-container form'" id="pane-details">
-        <div th:class="${elementItemSetting + ' element-item form-group'">
+      <form th:class="${elementContainerSetting} + ' element-container form'" id="pane-details">
+        <div th:class="${elementItemSetting} + ' element-item form-group'">
           <label class="form-label" style="width: 100%; text-align: center" th:text="Status: ${falsehood.fullMetaData.status}"></label>
 
-          <button th:if="canReview" type="button"
+          <button th:if="${canReview}" type="button"
                   id="review-start-button"
                   class="btn btn-primary"
-                  (click)="prepReview()"
+                  onclick="showSlider('reviewSlider')"
           >Review</button>
-          <button th:if="canAppeal" type="button"
+          <button th:if="${canAppeal}" type="button"
                   class="btn btn-primary"
-                  (click)="isAppealing = true"
+                  onclick="showSlider('appealSlider')"
           >Appeal</button>
-          <button th:if="canSubmit" type="button"
+          <button th:if="${canSubmit}" type="button"
                   class="btn btn-primary"
-                  (click)="makeSubmitted()"
+                  onclick="makeSubmitted()"
           >Submit</button>
         </div>
 
-        <div th:class="${elementItemSetting + ' element-item form-group'">
+        <div th:class="${elementItemSetting} + ' element-item form-group'">
           <label class="form-label">Title</label>
-          <p th:if="!canSubEdit && !canEmpEdit" th:text="falsehood.fullMetaData.title"></p>
+          <p th:if="${!canSubEdit && !canEmpEdit}" th:text="falsehood.fullMetaData.title"></p>
 
 
-          <input th:if="canSubEdit || canEmpEdit"
+          <input th:if="${canSubEdit || canEmpEdit}"
                  id="title-input"
                   class="form-control"
                   name="title"
@@ -405,21 +439,21 @@
         <div th:class="${elementItemSetting + ' element-item form-group'">
           <label>Culprits</label>
 
-          <div th:if="canSubEdit || canEmpEdit" th:replace="~{fragments/brand-searcher :: brandSearcher('culprit_brands')}"></div>
+          <div th:if="${canSubEdit || canEmpEdit}" th:replace="~{fragments/brand-searcher :: brandSearcher('culprit_brands')}"></div>
           <div id="culprits-list"></div>
 
         </div>
         <div th:class="${elementItemSetting + ' element-item form-group'">
           <label>Targets</label>
 
-          <div th:if="canSubEdit || canEmpEdit" th:replace="~{fragments/brand-searcher :: brandSearcher('target_brands')}"></div>
+          <div th:if="${canSubEdit || canEmpEdit}" th:replace="~{fragments/brand-searcher :: brandSearcher('target_brands')}"></div>
           <div id="targets-list"></div>
 
         </div>
         <div th:class="${elementItemSetting + ' element-item form-group'">
           <label>Date Made</label>
           <p th:text="${falsehood.fullMetaData.dateMade}" id="current-date-made"></p>
-          <div th:if="canSubEdit">
+          <div th:if="${canSubEdit}">
 
 
             <button id="do-date-edit" type="button" class="btn btn-primary">Edit Date</button>
@@ -440,8 +474,7 @@
           <div th:class="${elementItemSetting} + ' element-item form-group'">
             <label for="severity-select">Severity</label>
             <p th:text="${falsehood.fullMetaData.severity}"></p>
-              @if (()) {
-              <div th:if="canSubEdit || canEmpEdit">
+              <div th:if="${canSubEdit || canEmpEdit}">
 
                   <button id="severity-toggle" type="button" class="btn btn-primary">Edit Severity</button>
 
@@ -488,7 +521,7 @@
 
       <div th:class="${elementContainerSetting + ' element-container'" id="pane-content" hidden>
           <h3>Explanation</h3>
-          <div th:if="canSubEdit">
+          <div th:if="${canSubEdit}">
 
               <button id="content-toggle-edit" type="button" class="btn btn-primary" >Edit Explanation</button>
 
@@ -505,7 +538,7 @@
 
       <div th:class="${elementContainerSetting + ' element-container'" id="pane-briefs" hidden>
 
-          <button th:if="canAddBrief && isAccepted" id="submit-brief-button" type="button" class="btn btn-primary" onclick="setEditingBrief(true)">Submit Brief</button>
+          <button th:if="${canAddBrief && isAccepted}" id="submit-brief-button" type="button" class="btn btn-primary" onclick="setEditingBrief(true)">Submit Brief</button>
 
 
           <div id="adding-brief-div" hidden>
@@ -574,6 +607,21 @@
         </form>
     </div>
 
+    <div th:insert="~{fragments/up-slider :: upSlider('appealSlider', 10, 'Appeal Falsehood', ~{::appealBody})}">
+        <form th:ref="appealBody" class="form">
+            <div class="form-group">
+                <label for="appeal-comment-text">Comment</label>
+                <textarea
+                        id="appeal-comment-text"
+                        oninput="setAppealComment(event)"
+                        class="form-control"
+                        name="appealComment"
+                ></textarea>
+            </div>
+
+            <button type="button" id="submit-appeal" class="btn btn-primary" onclick="submitAppeal()">Post Appeal</button>
+        </form>
+    </div>
 
 
     <script th:inline="javascript">

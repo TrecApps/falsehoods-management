@@ -21,7 +21,7 @@
 </head>
 
 <body>
-    <div th:replace="~{fragments/topbar :: bar}"></div>
+
 
     <script th:inline="javascript">
         var elementItemStyle = [[${elementItemSetting}]]
@@ -116,28 +116,30 @@
             document.findElementById("severity-desc").textContent = desc;
         }
     </script>
+    <div th:replace="~{fragments/topbar :: bar}"></div>
+
     <div style="height:50px"></div>
 
     <div class="container">
-        <div th:class="${elementContainerSetting + ' element-container form'">
-            <div th:class="${elementItemSetting + ' element-item form-group'">
+        <div th:class="${elementContainerSetting} + ' element-container form'">
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
                 <label>Culprits</label>
                 <div id="culprit-holder"></div>
                 <div th:replace="~{fragments/brand-searcher :: brandSearcher('culprit_brands')}"></div>
             </div>
         </div>
-        <div th:class="${elementContainerSetting + ' element-container form'">
-            <div th:class="${elementItemSetting + ' element-item form-group'">
+        <div th:class="${elementContainerSetting} + ' element-container form'">
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
                 <label>Culprits</label>
                 <div id="target-holder"></div>
                 <div th:replace="~{fragments/brand-searcher :: brandSearcher('target_brands')}"></div>
             </div>
         </div>
-        <div th:class="${elementContainerSetting + ' element-container form'">
-            <div th:class="${elementItemSetting + ' element-item form-group'">
+        <div th:class="${elementContainerSetting} + ' element-container form'">
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
                 <p id="severity-desc"></p>
             </div>
-            <div th:class="${elementItemSetting + ' element-item form-group'">
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
                 <label for="severity-selection" class="form-label">Falsehood Severity</label>
                     <select id="severity-selection" class="form-select" onchange="severitySelected(e)">
                         <option value="no_select">No Selection</option>
@@ -151,14 +153,14 @@
                     </select>
             </div>
         </div>
-        <div th:class="${elementContainerSetting + ' element-container form'">
-            <div th:class="${elementItemSetting + ' element-item form-group'">
+        <div th:class="${elementContainerSetting} + ' element-container form'">
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
                 <label for="before-input" class="form-label">Before Date (inclusive)</label>
                 <p id="before-label"></p>
                 <input id="before-input" type="date" class="form-control">
                 <button id="remove-before" class="btn btn-danger">Remove</button>
             </div>
-            <div th:class="${elementItemSetting + ' element-item form-group'">
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
                 <label for="after-input" class="form-label">After Date (inclusive)</label>
                 <p id="after-label"></p>
                 <input id="after-input" type="date" class="form-control">
@@ -166,18 +168,18 @@
             </div>
         </div>
 
-        <div th:class="${elementContainerSetting + ' element-container form'">
-            <div th:class="${elementItemSetting + ' element-item'">
+        <div th:class="${elementContainerSetting} + ' element-container form'">
+            <div th:class="${elementItemSetting} + ' element-item'">
                 <p id="date-message" hidden class="btn btn-danger">After Date Cannot be before the Before Date</p>
             </div>
-            <div th:class="${elementItemSetting + ' element-item'">
+            <div th:class="${elementItemSetting} + ' element-item'">
                 <button class="btn btn-submit" id="do-search">Search</button>
             </div>
         </div>
 
         <div class="search-container" id="search-container" hidden>
             <p>Showing {{ (currentSize * currentPage) + 1}} - {{ currentSize * (currentPage + 1) }} Falsehoods</p>
-            <div th:class="${elementContainerSetting + ' element-container'" style="width: 100%;" id="result-holder">
+            <div th:class="${elementContainerSetting} + ' element-container'" style="width: 100%;" id="result-holder">
 
             </div>
             <div class="flex-and-center" style="gap: 10px;margin: 10px;">

@@ -2,15 +2,11 @@ package com.trecapps.falsehoods.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trecapps.falsehoods.models.Brand;
-import com.trecapps.falsehoods.models.BrandComplete;
-import com.trecapps.falsehoods.models.BrandContent;
-import com.trecapps.falsehoods.models.ReviewStage;
+import com.trecapps.falsehoods.models.*;
 import com.trecapps.falsehoods.services.BrandService;
 import com.trecapps.falsehoods.services.WelcomeService;
 import com.trecauth.common.model.AccountList;
 import com.trecauth.common.model.TrecauthAuthentication;
-import lombok.Data;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,10 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Component
-public class FrontendRouter {
+public class BrandsRouter extends BaseRouter{
 
     @Autowired
     WelcomeService welcomeService;
@@ -47,44 +42,6 @@ public class FrontendRouter {
     @Value("${trecapps.falsehoods.base-path}")
     String falsehoodsPath;
 
-
-
-    @Data
-    static
-    class FrontendData<T> {
-        AccountList accountList;
-        T Data;
-    }
-
-    <T> Mono<FrontendData<T>> prepareData(){
-        return ReactiveSecurityContextHolder.getContext()
-                .map((SecurityContext context) -> {
-                    FrontendData<T> data = new FrontendData<>();
-                    if(context.getAuthentication() instanceof TrecauthAuthentication trecAuthentication){
-                        data.setAccountList(trecAuthentication.getList());
-                    }
-                    return data;
-                });
-    }
-
-    String getPathVariable(String name, ServerRequest request){
-        try{
-            return request.pathVariable(name);
-        } catch(IllegalArgumentException ignore){
-            return null;
-        }
-    }
-
-    void prepStyles(Map<String, Object> dataMap, AccountList list){
-        String elementStyle = "element-container-default";
-
-        // ToDo - get details of styles
-
-        // End ToDo
-
-        dataMap.put("elementContainerSetting", elementStyle);
-        dataMap.put("elementItemSetting", elementStyle.replace("container", "item"));
-    }
 
     String convertObjectToString(Object o){
         try{

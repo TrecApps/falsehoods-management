@@ -1,5 +1,6 @@
 package com.trecapps.falsehoods.controllers;
 
+import com.trecapps.falsehoods.models.Brand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -23,10 +24,13 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 public class RouteConfig implements WebFluxConfigurer
 {
     @Autowired
-    private FrontendRouter frontendRouter;
+    private BrandsRouter frontendRouter;
 
     @Autowired
     private LoginRouter loginRouter;
+
+    @Autowired
+    private FalsehoodsRouter falsehoodsRouter;
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -45,6 +49,8 @@ public class RouteConfig implements WebFluxConfigurer
                 .GET("/Article/{id}", frontendRouter::articlePage)
                 .GET("/ArticleEdit", frontendRouter::articleEditPage)
                 .GET("/ArticleEdit/{id}", frontendRouter::articleEditPage)
+                .GET("/FalsehoodSearch", falsehoodsRouter::falsehoodSearchPage)
+                .GET("/Falsehood/{id}", falsehoodsRouter::falsehoodPage)
                 .build();
     }
 
