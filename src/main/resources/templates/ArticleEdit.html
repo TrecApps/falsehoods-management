@@ -20,6 +20,13 @@
 </head>
 
 <body>
+    <script th:inline="javascript">
+        var elementItemSetting = [[${elementItemSetting}]]
+        var elementItemSettingOrig = [[${elementItemSetting}]]
+
+        var elementContainerSetting = [[${elementContainerSetting}]]
+        var elementContainerSettingOrig = [[${elementContainerSetting}]]
+    </script>
 
     <div th:replace="~{fragments/topbar :: bar}"></div>
     <div style="height:50px"></div>
@@ -81,8 +88,6 @@
     <script th:inline="javascript">
         var brandContent = [[${brandContent}]]
         var brandMetadata = [[${metadata}]]
-
-        var itemStyle = [[${elementItemSetting}]]
 
         var falsehoodServiceUrl = [[${falsehoodServiceUrl}]]
 

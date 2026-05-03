@@ -24,8 +24,11 @@
 
 
     <script th:inline="javascript">
-        var elementItemStyle = [[${elementItemSetting}]]
-        var elementContainerStyle = [[${elementContainerSetting}]]
+        var elementItemSetting = [[${elementItemSetting}]]
+        var elementItemSettingOrig = [[${elementItemSetting}]]
+
+        var elementContainerSetting = [[${elementContainerSetting}]]
+        var elementContainerSettingOrig = [[${elementContainerSetting}]]
 
         var searchObject = {
             culprit: null,
@@ -255,7 +258,7 @@
 
                 let resultParent = document.createElement("div");
                 resultParent.classList.add("element-item");
-                resultParent.classList.add(elementItemStyle);
+                resultParent.classList.add(elementItemSetting);
                 resultParent.addEventListener("click", () => {});
 
                 resultHolder.appendChild(resultParent);

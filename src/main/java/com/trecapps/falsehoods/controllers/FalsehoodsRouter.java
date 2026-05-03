@@ -38,6 +38,8 @@ public class FalsehoodsRouter extends BaseRouter{
     String falsehoodsUrl;
     @Value("${trecapps.falsehoods.base-path}")
     String falsehoodsPath;
+    @Value("${trecapps.login.url}")
+    String loginUrl;
 
     <T> Mono<FrontendData<T>> prepareData(){
         return ReactiveSecurityContextHolder.getContext()
@@ -57,6 +59,7 @@ public class FalsehoodsRouter extends BaseRouter{
         dataMap.put("list", list);
         dataMap.put("imageServiceUrl", imageUrl);
         dataMap.put("falsehoodServiceUrl", falsehoodsUrl);
+        dataMap.put("userServiceUrl", loginUrl);
         dataMap.put("baseUrl", falsehoodsPath);
         //dataMap.put("isResourceEmployee", list != null && list.getMainAccount().getPermissions().contains("RESOURCE_EMPLOYEE"));
         if(list != null){

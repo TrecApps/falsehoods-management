@@ -20,6 +20,12 @@
 </head>
 <body>
     <script th:inline="javascript">
+        var elementItemSetting = [[${elementItemSetting}]]
+        var elementItemSettingOrig = [[${elementItemSetting}]]
+
+        var elementContainerSetting = [[${elementContainerSetting}]]
+        var elementContainerSettingOrig = [[${elementContainerSetting}]]
+
         var title = "";
         var severity = undefined;
         var culprits = [];

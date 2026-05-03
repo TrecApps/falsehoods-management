@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div
+        th:fragment="popup(popupId, zIndex, title, popupBody)"
+        th:id="${popupId}"
+        class="popup-background"
+        th:style="'z-index: ' + ${zIndex} + ';'"
+        hidden
+>
+    <div style="{'background-color': 'white'}">
+        <div class="slider-top-bar">
+            <div class="slider-top-bar-buffer" th:text="${title}"></div>
+            <div class="red-button-container">
+                <button th:attr="onclick=|hidePopup('__${popupId}__')|">
+                    <img src="images/X-image.png" alt="exit button">
+                </button>
+            </div>
+        </div>
+
+
+        <div style="overflow-y: scroll; padding: 5px" th:replace="${popupBody}">
+
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>

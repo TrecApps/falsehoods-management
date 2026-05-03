@@ -30,8 +30,11 @@
       const canSubEdit = [[${canSubEdit}]]
       const canEmpEdit = [[${canEmpEdit}]]
 
-      var elementItemStyle = [[${elementItemSetting}]]
-      var elementContainerStyle = [[${elementContainerSetting}]]
+      var elementItemSetting = [[${elementItemSetting}]]
+      var elementItemSettingOrig = [[${elementItemSetting}]]
+
+      var elementContainerSetting = [[${elementContainerSetting}]]
+      var elementContainerSettingOrig = [[${elementContainerSetting}]]
 
       const falsehoodServiceUrl = [[${falsehoodServiceUrl}]]
 
@@ -236,16 +239,16 @@
          function generateBriefElement(brief) {
             let ret = document.createElement("div");
             ret.classList.add("element-item");
-            ret.classList.add(elementItemStyle);
+            ret.classList.add(elementItemSetting);
 
             let briefComponent = document.createElement("div");
             briefComponent.classList.add("element-container");
-            briefComponent.classList.add(elementContainerStyle);
+            briefComponent.classList.add(elementContainerSetting);
             ret.appendChild(briefComponent);
 
             let submitterDiv = document.createElement("div");
             submitterDiv.classList.add("element-item");
-            submitterDiv.classList.add(elementItemStyle);
+            submitterDiv.classList.add(elementItemSetting);
             submitterDiv.style.display = "flex";
             let submitterP = document.createElement("p");
             submitterP.innerHTML = `<b>Submitter: </b>${ brief.displayName }`;
@@ -274,7 +277,7 @@
 
             submitterDiv = document.createElement("div");
             submitterDiv.classList.add("element-item");
-            submitterDiv.classList.add(elementItemStyle);
+            submitterDiv.classList.add(elementItemSetting);
             let submitterP = document.createElement("p");
             submitterP.innerHTML = `<b>Type: </b>${ brief.purpose }`;
             submitterDiv.appendChild(submitterP);
@@ -282,7 +285,7 @@
 
             submitterDiv = document.createElement("div");
             submitterDiv.classList.add("element-item");
-            submitterDiv.classList.add(elementItemStyle);
+            submitterDiv.classList.add(elementItemSetting);
             let submitterP = document.createElement("p");
             submitterP.innerHTML = `<b>Added: </b>${ brief.created }`;
             submitterDiv.appendChild(submitterP);
@@ -290,7 +293,7 @@
 
             submitterDiv = document.createElement("div");
             submitterDiv.classList.add("element-item");
-            submitterDiv.classList.add(elementItemStyle);
+            submitterDiv.classList.add(elementItemSetting);
             let markdownDiv = document.createElement("div");
             markdownDiv.classList.add("md-preview-side");
             markdownDiv.id = `brief-${brief.id}`

@@ -19,6 +19,155 @@
         }
 
         window["topbar_brands_onBrandSelected"] = topBarOnBrandSelected;
+
+
+        function logout(){
+            let baseUserUrl = [[${userServiceUrl}]];
+            fetch(`${baseUserUrl}/Login`, {
+                method: "DELETE"
+            }).then(() => {
+                window.location.reload();
+            })
+        }
+
+        // Styles Management
+
+        const colorList = [
+            {
+              colorStyle: '#d1d1d1',
+              styleName: 'default'
+            },{
+              colorStyle: '#ff0000ff',
+              styleName: 'red'
+            },{
+              colorStyle: 'rgb(0, 171, 255)',
+              styleName: 'blue'
+            },{
+              colorStyle: 'rgb(8, 223, 41)',
+              styleName: 'green'
+            },{
+              colorStyle: 'rgb(255, 239, 1)',
+              styleName: 'yellow'
+            },{
+              colorStyle: 'rgb(255, 120, 1)',
+              styleName: 'orange'
+            },{
+              colorStyle: 'rgb(221, 99, 255)',
+              styleName: 'purple'
+            },{
+              colorStyle: 'rgb(255, 59, 243)',
+              styleName: 'pink'
+            }
+          ]
+
+        areStylesDifferent() {
+            let persistButton = document.getElementById("persist-style-button");
+            if(!persistButton) return;
+
+            persistButton.disabled = elementItemSetting == elementItemSettingOrig;
+        }
+
+        onUseDarkChecked(event){
+            let useDark = event.target.checked;
+
+            // Extract current Style
+            let currentStyle = elementItemSetting.split('-');
+            currentStyle = currentStyle[currentStyle.length -1];
+
+            let newItemStyle = useDark ? "element-item-dark" : "element-item";
+            let newContainerStyle = useDark ? "element-container-dark" : "element-container";
+
+            newItemStyle = `${newItemStyle}-${currentStyle}`;
+            newContainerStyle = `${newContainerStyle}-${currentStyle}`;
+
+            let elements = document.getElementsByClassName(elementItemSetting);
+            for(let element of elements) {
+                element.classList.remove(elementItemSetting);
+                element.classList.add(newItemStyle);
+            }
+            elementItemSetting = newItemStyle;
+
+            elements = document.getElementsByClassName(elementContainerSetting);
+            for(let element of elements) {
+                element.classList.remove(elementContainerSetting);
+                element.classList.add(newContainerStyle);
+            }
+            elementContainerSetting = newContainerStyle;
+
+            areStylesDifferent();
+        }
+
+        function onSetNewColorStyle(colorName){
+            // Extract current Style
+            let currentItemStyle = elementItemSetting.split('-');
+            currentItemStyle[currentStyle.length -1] = colorName;
+            currentItemStyle = currentItemStyle.join('-');
+
+            let currentContainerStyle = elementContainerSetting.split('-');
+            currentContainerStyle[currentStyle.length -1] = colorName;
+            currentContainerStyle = currentContainerStyle.join('-');
+
+            let elements = document.getElementsByClassName(elementItemSetting);
+            for(let element of elements) {
+                element.classList.remove(elementItemSetting);
+                element.classList.add(currentItemStyle);
+            }
+            elementItemSetting = currentItemStyle;
+
+            elements = document.getElementsByClassName(elementContainerSetting);
+            for(let element of elements) {
+                element.classList.remove(elementContainerSetting);
+                element.classList.add(currentContainerStyle);
+            }
+            elementContainerSetting = currentContainerStyle;
+
+            areStylesDifferent();
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+
+            let colorPanel = document.getElementById('color-panel');
+
+            for(let color of colorList){
+
+                let colorButton = document.createElement("div");
+                colorButton.classList.add("color-button");
+                colorButton.style.backgroundColor = color.colorStyle;
+                colorButton.addEventListener("click", () => {
+                    onSetNewColorStyle(color.styleName);
+                });
+                colorPanel.appendChild(colorButton);
+            }
+
+            document.getElementById("style-dark-checkbox").checked = elementContainerSetting.includes("dark");
+
+        });
+
+        updateStyle(e) {
+
+            e.target.disabled = true;
+
+            let currentStyle = elementItemSetting.split('-');
+            currentStyle = currentStyle[currentStyle.length -1];
+
+            let body = {
+                style: currentStyle,
+                useDark: elementItemSetting.includes("dark")
+            }
+
+            let baseUserUrl = [[${userServiceUrl}]];
+            fetch(`${baseUserUrl}/accounts/styles`, {
+                method: "PATCH",
+                body: JSON.stringify(body),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }).then(() => {
+                elementItemSettingOrig = elementItemSetting;
+                elementContainerSettingOrig = elementContainerSetting;
+            })
+        }
+
     </script>
 
     <div class="top-bar-child">
@@ -89,6 +238,7 @@
         <div
             th:if="${list != null}"
             class="profile-section"
+
         >
             <div class="profile-img">
                 <img th:src="${profilePic}">
@@ -98,6 +248,26 @@
             </div>
         </div>
 
+
+        <div th:class="${elementContainerSetting} + ' profile-panel element-container'"
+             hidden
+        >
+            <div>
+                <div
+                    th:class="${elementItemSetting} + ' element-item'"
+                    onclick="showPopup('stylesPopup')"
+                >
+                    <p>Set Style</p>
+                </div>
+                <hr>
+                <div
+                        th:class="${elementItemSetting} + ' element-item'"
+                        onclick="logout()"
+                >
+                    <p>Logout</p>
+                </div>
+            </div>
+        </div>
 
         <a
             th:if="${list == null}"
@@ -201,7 +371,28 @@
     >
         <img src="images/non-profile-mob.png" alt="Login">
     </div>
+
+
 </div>
+
+    <div th:replace="~{fragments/popup :: popup('stylesPopup', 50, 'Set Style', ~{::styleBody})}">
+        <div class="color-panel" id="color-panel">
+
+        </div>
+        <div class="form-group">
+            <input
+                    id="style-dark-checkbox"
+                    type="checkbox"
+                    class="form-check-input"
+                    onchange="onUseDarkChecked(event)"
+            >
+            <label class="form-check-label">Use Dark mode</label>
+            <div th:class="${elementItemSetting} + ' element-item'" style="height: 10px"></div>
+
+            <button th:if="${user != null}" id="persist-style-button" disabled class="btn btn-primary" onclick="updateStyle()"> Persist Style</button>
+
+        </div>
+    </div>
 
     <script>
         const brandOnButton = document.getElementById("set-search-on");
