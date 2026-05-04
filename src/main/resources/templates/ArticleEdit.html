@@ -186,7 +186,7 @@
             for(let t of brandMetadata.resourceTypes) {
                 let item = document.createElement("div");
                 item.classList.add("element-item");
-                item.classList.add(itemStyle);
+                item.classList.add(elementItemSetting);
                 item.classList.add("resource-cur-sel");
 
                 let name = document.createElement("p");
@@ -338,7 +338,7 @@
                 let responseObj = await response.json();
 
                 let id = responseObj.id;
-                window.location = `${falsehoodServiceUrl}/brands-api/${id}`;
+                window.location = `${falsehoodServiceUrl}/Article/${id}`;
 
             }).catch(() => {alert("Failed to save object")});
 

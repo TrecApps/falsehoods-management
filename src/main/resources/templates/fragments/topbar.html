@@ -60,14 +60,14 @@
             }
           ]
 
-        areStylesDifferent() {
+        function areStylesDifferent() {
             let persistButton = document.getElementById("persist-style-button");
             if(!persistButton) return;
 
             persistButton.disabled = elementItemSetting == elementItemSettingOrig;
         }
 
-        onUseDarkChecked(event){
+        function onUseDarkChecked(event){
             let useDark = event.target.checked;
 
             // Extract current Style
@@ -139,11 +139,9 @@
                 colorPanel.appendChild(colorButton);
             }
 
-            document.getElementById("style-dark-checkbox").checked = elementContainerSetting.includes("dark");
-
         });
 
-        updateStyle(e) {
+        function updateStyle(e) {
 
             e.target.disabled = true;
 
@@ -376,22 +374,23 @@
 </div>
 
     <div th:replace="~{fragments/popup :: popup('stylesPopup', 50, 'Set Style', ~{::styleBody})}">
-        <div class="color-panel" id="color-panel">
+        <div th:ref="styleBody">
+            <div class="color-panel" id="color-panel"></div>
+            <div class="form-group">
+                <input
+                        id="style-dark-checkbox"
+                        type="checkbox"
+                        class="form-check-input"
+                        onchange="onUseDarkChecked(event)"
+                >
+                <label class="form-check-label">Use Dark mode</label>
+                <div th:class="${elementItemSetting} + ' element-item'" style="height: 10px"></div>
 
+                <button th:if="${user != null}" id="persist-style-button" disabled class="btn btn-primary" onclick="updateStyle()"> Persist Style</button>
+
+            </div>
         </div>
-        <div class="form-group">
-            <input
-                    id="style-dark-checkbox"
-                    type="checkbox"
-                    class="form-check-input"
-                    onchange="onUseDarkChecked(event)"
-            >
-            <label class="form-check-label">Use Dark mode</label>
-            <div th:class="${elementItemSetting} + ' element-item'" style="height: 10px"></div>
 
-            <button th:if="${user != null}" id="persist-style-button" disabled class="btn btn-primary" onclick="updateStyle()"> Persist Style</button>
-
-        </div>
     </div>
 
     <script>
@@ -408,6 +407,10 @@
         brandOffButton.addEventListener("click", () => {
             searchHolder.hidden = true;
             navHolder.hidden = false;
+        });
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.getElementById("style-dark-checkbox").checked = elementContainerSetting.includes("dark");
         });
 
 

@@ -7,7 +7,7 @@ function initBrandSearcher(brandSearcherId) {
 
     var mostRecentSearch = new Date(); // Used to track the most recent search.
 
-    var itemStyle = window.appConfig.itemStyle;
+    var elementItemSetting = window.appConfig.elementItemSetting;
 
     function onInputChange(event){
         name = event.target.value;
@@ -31,7 +31,7 @@ function initBrandSearcher(brandSearcherId) {
             let optionDiv = document.createElement("div");
             optionDiv.classList.add("brand-option");
             optionDiv.classList.add("element-item");
-            optionDiv.classList.add(itemStyle);
+            optionDiv.classList.add(elementItemSetting);
             optionDiv.addEventListener("click", () => {
                 window[`${brandSearcherId}_onBrandSelected`](result);
             });
