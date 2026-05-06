@@ -20,11 +20,11 @@ public class FalsehoodSearchService {
     @Autowired
     IObjectStorageService objectStorageService;
 
-    List<Brand> getBrands(List<UUID> ids, SortedSet<Brand> brands){
+    List<BrandSearchResult> getBrands(List<UUID> ids, SortedSet<BrandSearchResult> brands){
         return new TreeSet<>(brands)
                 .stream()
-                .filter((Brand b) -> {
-                    return ids.contains(b.getId());
+                .filter((BrandSearchResult b) -> {
+                    return ids.contains(b.getBrand().getId());
                 })
                 .toList();
     }
@@ -83,9 +83,24 @@ public class FalsehoodSearchService {
                     return this.mongoRepo.getBrandsByList(brandIds)
                             .filter(Optional::isPresent)
                             .map(Optional::get)
+                            .flatMap((Brand brand) -> {
+                                return this.objectStorageService.retrieveThumbnail(brand.getId())
+                                        .map((String thumbnail) -> {
+                                            BrandSearchResult complete = new BrandSearchResult();
+                                            complete.setImage(thumbnail);
+                                            complete.setBrand(brand);
+                                            return complete;
+                                        })
+                                        .switchIfEmpty(Mono.just(brand)
+                                                .map((Brand b) -> {
+                                                    BrandSearchResult complete = new BrandSearchResult();
+                                                    complete.setBrand(b);
+                                                    return complete;
+                                                }));
+                            })
                             .collectList()
-                            .map((List<Brand> brands) -> {
-                                SortedSet<Brand> brandSet = new TreeSet<>(Comparator.comparing(Brand::getId));
+                            .map((List<BrandSearchResult> brands) -> {
+                                SortedSet<BrandSearchResult> brandSet = new TreeSet<>(Comparator.comparing((BrandSearchResult complete) -> complete.getBrand().getId()));
                                 FalsehoodRet ret1 = new FalsehoodRet();
                                 brandSet.addAll(brands);
 
@@ -127,10 +142,24 @@ public class FalsehoodSearchService {
                     return this.mongoRepo.getBrandsByList(brandIds)
                             .filter(Optional::isPresent)
                             .map(Optional::get)
+                            .flatMap((Brand brand) -> {
+                                return this.objectStorageService.retrieveThumbnail(brand.getId())
+                                        .map((String thumbnail) -> {
+                                            BrandSearchResult complete = new BrandSearchResult();
+                                            complete.setImage(thumbnail);
+                                            complete.setBrand(brand);
+                                            return complete;
+                                        }).switchIfEmpty(Mono.just(brand)
+                                                .map((Brand b) -> {
+                                                    BrandSearchResult complete = new BrandSearchResult();
+                                                    complete.setBrand(b);
+                                                    return complete;
+                                                }));
+                            })
                             .collectList()
-                            .map((List<Brand> brands) -> {
+                            .map((List<BrandSearchResult> brands) -> {
                                 List<FalsehoodRet> ret = new ArrayList<>(docs.size());
-                                SortedSet<Brand> brandSet = new TreeSet<>(Comparator.comparing(Brand::getId));
+                                SortedSet<BrandSearchResult> brandSet = new TreeSet<>(Comparator.comparing((BrandSearchResult complete) -> complete.getBrand().getId()));
                                 brandSet.addAll(brands);
 
                                 for(FalsehoodDocument doc: docs){

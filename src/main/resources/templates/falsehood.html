@@ -45,9 +45,12 @@
 
       function performPatch(field, value, onSuccess) {
 
-        fetch(`${falsehoodServiceUrl}/falsehood-search-api`, {
-                method: "POST",
-                body: JSON.stringify(postObject),
+
+        fetch(`${falsehoodServiceUrl}/Falsehood-api/${falsehood.fullMetaData.id}`, {
+                method: "PATCH",
+                body: JSON.stringify({
+                    field, value
+                }),
                 headers: {
                     "Content-Type": "application/json"
                 }
@@ -62,51 +65,63 @@
 
       }
 
-        function updateBrandElementList(which){
-            let listHolder = document.getElementById(`${which}-list`);
+      function resetBrandList(elementId, values) {
+            let brandHolder = document.getElementById(`${elementId}-list`);
 
-            listHolder.replaceChildren();
 
-            let curList = brandsTracker[which];
+            brandHolder.replaceChildren();
 
-            for(let brand of curList){
 
-                let brandDiv = document.createElement("div");
-                brandDiv.classList.add("brand-option");
-                listHolder.appendChild(brandDiv);
 
-                let nameP = document.createElement("p");
-                nameP.textContent = brand.names[0];
-                brandDiv.appendChild(nameP);
+            for(let brandIndex in values) {
 
-                if(canSubEdit || canEmpEdit) {
-                    let removeDiv = document.createElement("div");
-                    removeDiv.textContent = "(X)";
-                    removeDiv.addEventListener("click", () => {
+                let brand = values[brandIndex];
 
-                        performPatch(`${which}-remove`, brand.id, () => {
+                let brandOption = document.createElement("div");
+                brandOption.classList.add("brand-option");
+                brandHolder.appendChild(brandOption);
 
-                            falsehood.fullMetaData[which] = falsehood.fullMetaData[which].filter((b) => b != brand.id);
-                            brandsTracker[which] = falsehood.fullMetaData[which];
-                            updateBrandElementList(which);
+                let brandImgHolder = document.createElement("div");
+                brandImgHolder.classList.add("brand-img-holder");
+                brandOption.appendChild(brandImgHolder);
 
-                        });
+                let brandImg = document.createElement("img");
+                brandImg.src = brand.image || "images/none.png";
+                brandImgHolder.appendChild(brandImg);
+
+                let brandNameHolder = document.createElement("div");
+                brandNameHolder.innerHTML = `<h5 class="brand-name">${ brand.brand.names[0] }</h5>`
+                brandOption.appendChild(brandNameHolder);
+
+                let removeDiv = document.createElement("div");
+                removeDiv.addEventListener("click", () => {
+                    performPatch(`${elementId}-remove`, brand.brand.id, () => {
+
+                       falsehood.fullMetaData[elementId] = falsehood.fullMetaData[elementId].filter((b) => b.brand.id != brand.brand.id);
+                       brandsTracker[elementId] = falsehood.fullMetaData[elementId];
+                       resetBrandList(elementId, falsehood.fullMetaData[elementId]);
 
                     });
-                    brandDiv.appendChild(removeDiv);
-                }
+
+
+                })
+                removeDiv.textContent = "(X)";
+                removeDiv.classList.add("exit-div");
+                brandOption.appendChild(removeDiv);
 
             }
+
         }
+
 
         function culpritsOnBrandSelected(result){
 
             let which = "culprits";
 
             performPatch(which, result.brand.id, () => {
-                falsehood.fullMetaData[which].add(result);
+                falsehood.fullMetaData[which].push(result);
                 brandsTracker[which] = falsehood.fullMetaData[which];
-                updateBrandElementList(which);
+                resetBrandList(which, falsehood.fullMetaData[which]);
             });
         }
 
@@ -114,9 +129,9 @@
             let which = "targets";
 
             performPatch(which, result.brand.id, () => {
-                falsehood.fullMetaData[which].add(result);
+                falsehood.fullMetaData[which].push(result);
                 brandsTracker[which] = falsehood.fullMetaData[which];
-                updateBrandElementList(which);
+                resetBrandList(which, falsehood.fullMetaData[which]);
             });
         }
 
@@ -635,8 +650,8 @@
 
 
         document.addEventListener('DOMContentLoaded', (event) => {
-                updateBrandElementList("culprits");
-                updateBrandElementList("targets");
+                resetBrandList("culprits", falsehood.fullMetaData.culprits);
+                resetBrandList("targets", falsehood.fullMetaData.targets);
         });
 
 
@@ -822,6 +837,7 @@
                 }
 
                 contentMd.hidden = !contentMd.hidden;
+                contentEditorHolder.hidden = !contentEditorHolder.hidden;
             }
 
 

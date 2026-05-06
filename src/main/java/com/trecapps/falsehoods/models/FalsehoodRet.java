@@ -57,12 +57,12 @@ public class FalsehoodRet {
     /**
      * List of Brands that could constitute the culprits
      */
-    List<Brand> culprits = new ArrayList<>();
+    List<BrandSearchResult> culprits = new ArrayList<>();
 
     /**
      * List of targets of the Falsehood
      */
-    List<Brand> targets = new ArrayList<>();
+    List<BrandSearchResult> targets = new ArrayList<>();
 
     /**
      * Stage the Falsehood entry is currently in
