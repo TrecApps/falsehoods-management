@@ -7,6 +7,7 @@ import com.trecapps.falsehoods.services.BrandService;
 import com.trecapps.falsehoods.services.WelcomeService;
 import com.trecauth.common.model.AccountList;
 import com.trecauth.common.model.TrecauthAuthentication;
+import com.trecauth.common.model.UserAccount;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +68,10 @@ public class BrandsRouter extends BaseRouter{
         if(list != null){
             String profilePic = String.format("%s/profile/%s", this.imageUrl, list.getMainAccount().getId());
             dataMap.put("profilePic", profilePic);
+            UserAccount userAccount = list.getMainUserAccount();
+            dataMap.put("credibility", userAccount == null ? BigInteger.ZERO : userAccount.getCredibility());
+        } else {
+            dataMap.put("credibility", BigInteger.ZERO);
         }
 
         prepStyles(dataMap, list);

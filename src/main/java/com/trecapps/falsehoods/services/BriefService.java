@@ -42,6 +42,16 @@ public class BriefService {
         return false; //isBrandLinked(brands, falsehood);
     }
 
+    public boolean canLeaveBrief(FalsehoodRet falsehood, AccountList accountList){
+        UserAccount user = accountList.getMainUserAccount();
+        if(user.getId().equals(falsehood.getUCreator())
+                || user.getCredibility().compareTo(BigInteger.valueOf(briefCredibility)) <= 0
+                || accountList.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList().contains(EMPLOYEE_AUTH))
+            return true;
+
+        return false; //isBrandLinked(brands, falsehood);
+    }
+
 //    boolean isBrandLinked(TcBrands brands, Falsehood falsehood){
 //        String brandId = brands == null ? null : brands.getInfoId();
 //        return brandId != null && (

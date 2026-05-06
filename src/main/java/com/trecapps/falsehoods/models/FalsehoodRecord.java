@@ -4,6 +4,7 @@ import com.trecauth.common.model.Record;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.util.UUID;
@@ -22,7 +23,8 @@ public class FalsehoodRecord extends Record {
     /**
      * Apply indexing to the resourceId (the falsehood, for easier record finding)
      */
-    @Indexed(name = "f_resource_id")
+    @Indexed
+    @Field(name = "f_resource_id")
     UUID resourceId;
 
     public Record toRecord(){

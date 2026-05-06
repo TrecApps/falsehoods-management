@@ -20,6 +20,8 @@
 </head>
 <body>
     <script th:inline="javascript">
+        const falsehoodServiceUrl = [[${falsehoodServiceUrl}]]
+
         var elementItemSetting = [[${elementItemSetting}]]
         var elementItemSettingOrig = [[${elementItemSetting}]]
 
@@ -64,25 +66,27 @@
 
                 let brandImgHolder = document.createElement("div");
                 brandImgHolder.classList.add("brand-img-holder");
-                brandHolder.appendChild(brandImgHolder);
+                brandOption.appendChild(brandImgHolder);
 
                 let brandImg = document.createElement("img");
-                brandImg.src = brand.imgData || "images/none.png";
+                brandImg.src = brand.image || "images/none.png";
                 brandImgHolder.appendChild(brandImg);
 
                 let brandNameHolder = document.createElement("div");
-                brandNameHolder.innerHTML = `<h5 class="brand-name">${ culprit.brandInfo.name }</h5>`
-                brandHolder.appendChild(brandNameHolder);
+                brandNameHolder.innerHTML = `<h5 class="brand-name">${ brand.brand.names[0] }</h5>`
+                brandOption.appendChild(brandNameHolder);
 
                 let removeDiv = document.createElement("div");
                 removeDiv.addEventListener("click", () => {
-                    values.splice(bandIndex, 1);
+                    values.splice(brandIndex, 1);
                     resetBrandList(elementId, values);
                 })
                 removeDiv.textContent = "(X)";
-                brandHolder.appendChild(removeDiv);
+                removeDiv.classList.add("exit-div");
+                brandOption.appendChild(removeDiv);
 
             }
+            submitReady()
         }
 
         function culpritsOnBrandSelected(result){
@@ -96,7 +100,7 @@
         }
 
         window["culprit_brands_onBrandSelected"] = culpritsOnBrandSelected;
-        window["target_brands_onBrandSelected"] = culpritsOnBrandSelected;
+        window["target_brands_onBrandSelected"] = targetsOnBrandSelected;
 
         function setTitle(e) {
             title = e.target.value;
@@ -113,6 +117,7 @@
 
             document.getElementById("date-issue").hidden = dateOkay;
             document.getElementById("remove-date-button").disabled = !useDate;
+            submitReady();
         }
 
         function setDate(e) {
@@ -128,6 +133,7 @@
 
         function setNotes(e) {
             notes = e.target.value;
+            submitReady();
         }
 
         function submitFalsehood(isSubmitting) {
@@ -139,8 +145,8 @@
             url.search = new URLSearchParams(params).toString();
 
             let body = {
-                culprits,
-                targets,
+                culprits: culprits.map((obj) => obj.brand.id),
+                targets: targets.map((obj) => obj.brand.id),
                 dateMade,
                 severity,
                 title,
@@ -151,7 +157,7 @@
 
             fetch(url, {
                 method: "POST",
-                body: JSON.stringify(postObject),
+                body: JSON.stringify(body),
                 headers: {
                     "Content-Type": "application/json"
                 }
@@ -200,7 +206,7 @@
                 <div th:replace="~{fragments/brand-searcher :: brandSearcher('culprit_brands')}"></div>
             </div>
             <div th:class="${elementItemSetting} + ' element-item form-group'">
-                <label class="form-label">Culprits
+                <label class="form-label">Targets
                     <span id="targets-list-span">: None Selected</span>
                 </label>
                 <div id="targets-list">
@@ -225,8 +231,8 @@
                 <label for="input-notes" class="form-label">Notes</label>
                 <textarea id="input-notes" class="form-control" oninput="setNotes(event)" name="notes"></textarea>
             </div>
-            <button id="button-save" type="button" class="btn btn-white" disabled (click)="submitFalsehood(false)">Save</button>
-            <button id="button-submit" type="button" class="btn btn-primary" disabled (click)="submitFalsehood(true)">Submit</button>
+            <button id="button-save" type="button" class="btn btn-white" disabled onclick="submitFalsehood(false)">Save</button>
+            <button id="button-submit" type="button" class="btn btn-primary" disabled onclick="submitFalsehood(true)">Submit</button>
         </form>
     </div>
 

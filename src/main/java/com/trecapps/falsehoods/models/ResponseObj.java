@@ -37,6 +37,6 @@ public class ResponseObj {
     }
 
     public static ResponseObj getInstance201(String message, String id){
-        return getInstance(HttpStatus.OK, message, id);
+        return getInstance(HttpStatus.CREATED, message, id);
     }
 }

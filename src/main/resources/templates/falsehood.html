@@ -407,7 +407,7 @@
 
       <form th:class="${elementContainerSetting} + ' element-container form'" id="pane-details">
         <div th:class="${elementItemSetting} + ' element-item form-group'">
-          <label class="form-label" style="width: 100%; text-align: center" th:text="Status: ${falsehood.fullMetaData.status}"></label>
+          <label class="form-label" style="width: 100%; text-align: center" th:text="|Status: ${falsehood.fullMetaData.status}|"></label>
 
           <button th:if="${canReview}" type="button"
                   id="review-start-button"
@@ -426,7 +426,7 @@
 
         <div th:class="${elementItemSetting} + ' element-item form-group'">
           <label class="form-label">Title</label>
-          <p th:if="${!canSubEdit && !canEmpEdit}" th:text="falsehood.fullMetaData.title"></p>
+          <p th:if="${!canSubEdit && !canEmpEdit}" th:text="${falsehood.fullMetaData.title}"></p>
 
 
           <input th:if="${canSubEdit || canEmpEdit}"
@@ -440,21 +440,21 @@
 
         </div>
 
-        <div th:class="${elementItemSetting + ' element-item form-group'">
+        <div th:class="${elementItemSetting} + ' element-item form-group'">
           <label>Culprits</label>
 
           <div th:if="${canSubEdit || canEmpEdit}" th:replace="~{fragments/brand-searcher :: brandSearcher('culprit_brands')}"></div>
           <div id="culprits-list"></div>
 
         </div>
-        <div th:class="${elementItemSetting + ' element-item form-group'">
+        <div th:class="${elementItemSetting} + ' element-item form-group'">
           <label>Targets</label>
 
           <div th:if="${canSubEdit || canEmpEdit}" th:replace="~{fragments/brand-searcher :: brandSearcher('target_brands')}"></div>
           <div id="targets-list"></div>
 
         </div>
-        <div th:class="${elementItemSetting + ' element-item form-group'">
+        <div th:class="${elementItemSetting} + ' element-item form-group'">
           <label>Date Made</label>
           <p th:text="${falsehood.fullMetaData.dateMade}" id="current-date-made"></p>
           <div th:if="${canSubEdit}">
@@ -503,16 +503,16 @@
 
               </div>
           </div>
-          <div th:class="${elementItemSetting + ' element-item form-group'">
+          <div th:class="${elementItemSetting} + ' element-item form-group'">
             <label>Notes</label>
 
-              <p id="note-p" th:text="${Falsehood.fullMetaData.notes}"></p>
+              <p id="note-p" th:text="${falsehood.fullMetaData.notes}"></p>
 
           </div>
       </form>
 
-      <div th:class="${elementContainerSetting + ' element-container'" id="pane-records" hidden>
-          <div th:each="record: ${falsehood.fullMetaData.records}" th:class="${elementItemSetting + ' element-item'">
+      <div th:class="${elementContainerSetting} + ' element-container'" id="pane-records" hidden>
+          <div th:each="record: ${falsehood.fullMetaData.records}" th:class="${elementItemSetting} + ' element-item'">
               <p><b>By: </b><span th:text="${record.creator}"></span></p>
               <p><b>Made: </b><span th:text="${record.made}"></span></p>
               <p><b>Event: </b><span th:text="${record.type}"></span></p>
@@ -523,14 +523,14 @@
           </div>
       </div>
 
-      <div th:class="${elementContainerSetting + ' element-container'" id="pane-content" hidden>
+      <div th:class="${elementContainerSetting} + ' element-container'" id="pane-content" hidden>
           <h3>Explanation</h3>
           <div th:if="${canSubEdit}">
 
               <button id="content-toggle-edit" type="button" class="btn btn-primary" >Edit Explanation</button>
 
               <div id="content-editor-holder" hidden>
-                  <div th:replace="~{fragments/markdown-editor :: markdownEditor('contentEditor', falsehood.fullMetaData.content[falsehood.fullMetaData.content.size() - 1])}"></div>
+                  <div th:replace="~{fragments/markdown-editor :: markdownEditor('contentEditor', falsehoodContent)}"></div>
                   <button id="update-content-submit" type="button" class="btn btn-light">Update Explanation</button>
               </div>
 
@@ -540,7 +540,7 @@
 
       </div>
 
-      <div th:class="${elementContainerSetting + ' element-container'" id="pane-briefs" hidden>
+      <div th:class="${elementContainerSetting} + ' element-container'" id="pane-briefs" hidden>
 
           <button th:if="${canAddBrief && isAccepted}" id="submit-brief-button" type="button" class="btn btn-primary" onclick="setEditingBrief(true)">Submit Brief</button>
 
@@ -551,13 +551,13 @@
                   <option value="OPPOSE">Oppose (you oppose Confirmation)</option>
                   <option value="SUGGEST">Suggest</option>
               </select>
-              <div th:replace="~{fragments/markdown-editor :: markdownEditor('briefEditor', ''}"></div>
+              <div th:replace="~{fragments/markdown-editor :: markdownEditor('briefEditor', '')}"></div>
               <button type="button" class="btn btn-danger" onclick="setEditingBrief(false)">Cancel</button>
               <button type="button" class="btn btn-primary" onclick="submitBrief()">Submit</button>
           </div>
 
           <hr>
-          <div th:class="${elementContainerSetting + ' element-container'" id="brief-container">
+          <div th:class="${elementContainerSetting} + ' element-container'" id="brief-container">
 
           </div>
       </div>

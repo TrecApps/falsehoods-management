@@ -2,6 +2,7 @@ package com.trecapps.falsehoods.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trecapps.falsehoods.models.*;
+import com.trecapps.falsehoods.services.BriefService;
 import com.trecapps.falsehoods.services.FalsehoodSearchService;
 import com.trecauth.common.model.AccountList;
 import com.trecauth.common.model.TrecauthAuthentication;
@@ -41,6 +42,9 @@ public class FalsehoodsRouter extends BaseRouter{
     @Value("${trecapps.login.url}")
     String loginUrl;
 
+    @Autowired
+    BriefService briefService;
+
     <T> Mono<FrontendData<T>> prepareData(){
         return ReactiveSecurityContextHolder.getContext()
                 .map((SecurityContext context) -> {
@@ -56,11 +60,13 @@ public class FalsehoodsRouter extends BaseRouter{
     Map<String, Object> getDataMap(FrontendData<?> data){
         Map<String, Object> dataMap = new HashMap<>();
         AccountList list = data.getAccountList();
+        UserAccount userAccount = list == null ? null : list.getMainUserAccount();
         dataMap.put("list", list);
         dataMap.put("imageServiceUrl", imageUrl);
         dataMap.put("falsehoodServiceUrl", falsehoodsUrl);
         dataMap.put("userServiceUrl", loginUrl);
         dataMap.put("baseUrl", falsehoodsPath);
+        dataMap.put("credibility", userAccount == null ? BigInteger.ZERO : userAccount.getCredibility());
         //dataMap.put("isResourceEmployee", list != null && list.getMainAccount().getPermissions().contains("RESOURCE_EMPLOYEE"));
         if(list != null){
             String profilePic = String.format("%s/profile/%s", this.imageUrl, list.getMainAccount().getId());
@@ -98,10 +104,10 @@ public class FalsehoodsRouter extends BaseRouter{
         if(status == FalsehoodStage.SUBMITTED) {
             return (user.getCredibility().compareTo(BigInteger.valueOf(45)) > 0 || authRoles.contains("FALSEHOOD_EMPLOYEE"));
         }
-        if(status == FalsehoodStage.ACCEPTED || status.toString() == "ACCEPTED") {
+        if(status == FalsehoodStage.ACCEPTED) {
             return authRoles.contains("FALSEHOOD_EMPLOYEE") || authRoles.contains("FALSEHOOD_JUR");
         }
-        if(status == FalsehoodStage.R_APPEALED || status == FalsehoodStage.S_APPEALED){
+        if(status == FalsehoodStage.R_APPEALED){
             return authRoles.contains("FALSEHOOD_EMPLOYEE");
         }
         return false;
@@ -177,8 +183,13 @@ public class FalsehoodsRouter extends BaseRouter{
             dataMap.put("canReview", canReview(complete, list));
             dataMap.put("canAppeal", canAppeal(complete, list));
 
+            dataMap.put("falsehoodContent", complete.getContent().getLast().contents());
+            dataMap.put("isAccepted", fRet.getStatus() == FalsehoodStage.ACCEPTED);
+            dataMap.put("canAddBrief", list != null && briefService.canLeaveBrief(fRet, list));
+            dataMap.put("blankString", "");
 
-            return ServerResponse.ok().render("ArticleEdit", dataMap);
+
+            return ServerResponse.ok().render("falsehood", dataMap);
         });
 
     }
