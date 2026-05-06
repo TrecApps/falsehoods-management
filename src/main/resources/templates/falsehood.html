@@ -50,7 +50,8 @@
                 body: JSON.stringify(postObject),
                 headers: {
                     "Content-Type": "application/json"
-                }).then(async (response) => {
+                }
+        }).then(async (response) => {
 
                     let responseObj = await response.json();
                     if(responseObj.status == 200){
@@ -72,7 +73,7 @@
 
                 let brandDiv = document.createElement("div");
                 brandDiv.classList.add("brand-option");
-                curList.appendChild(brandDiv);
+                listHolder.appendChild(brandDiv);
 
                 let nameP = document.createElement("p");
                 nameP.textContent = brand.names[0];
@@ -191,7 +192,8 @@
                 body: JSON.stringify(body),
                 headers: {
                     "Content-Type": "application/json"
-                }).then(async (response) => {
+                }
+            }).then(async (response) => {
 
                     let responseObj = await response.json();
 
@@ -278,7 +280,7 @@
             submitterDiv = document.createElement("div");
             submitterDiv.classList.add("element-item");
             submitterDiv.classList.add(elementItemSetting);
-            let submitterP = document.createElement("p");
+            submitterP = document.createElement("p");
             submitterP.innerHTML = `<b>Type: </b>${ brief.purpose }`;
             submitterDiv.appendChild(submitterP);
             ret.appendChild(submitterDiv);
@@ -286,7 +288,7 @@
             submitterDiv = document.createElement("div");
             submitterDiv.classList.add("element-item");
             submitterDiv.classList.add(elementItemSetting);
-            let submitterP = document.createElement("p");
+            submitterP = document.createElement("p");
             submitterP.innerHTML = `<b>Added: </b>${ brief.created }`;
             submitterDiv.appendChild(submitterP);
             ret.appendChild(submitterDiv);
@@ -433,6 +435,7 @@
                  id="title-input"
                   class="form-control"
                   name="title"
+                 th:value="${falsehood.fullMetaData.title}"
           >
 
 
@@ -530,7 +533,7 @@
               <button id="content-toggle-edit" type="button" class="btn btn-primary" >Edit Explanation</button>
 
               <div id="content-editor-holder" hidden>
-                  <div th:replace="~{fragments/markdown-editor :: markdownEditor('contentEditor', falsehoodContent)}"></div>
+                  <div th:replace="~{fragments/markdown-editor :: markdownEditor('contentEditor', ${falsehoodContent})}"></div>
                   <button id="update-content-submit" type="button" class="btn btn-light">Update Explanation</button>
               </div>
 
@@ -631,6 +634,11 @@
     <script th:inline="javascript">
 
 
+        document.addEventListener('DOMContentLoaded', (event) => {
+                updateBrandElementList("culprits");
+                updateBrandElementList("targets");
+        });
+
 
 
         const detailsNav = document.getElementById("nav-details");
@@ -692,7 +700,7 @@
           performPatch("title", title.trim(), () => {
             falsehoods.fullMetaData.title = title.trim();
             assessTitleDifference();
-          }
+          });
 
         });
 
@@ -782,7 +790,7 @@
 
                 performPatch("severity", falsehood.fullMetaData.severity, () => {
                     severitySubmit.hidden = true;
-                }
+                });
 
             });
 
@@ -796,6 +804,8 @@
         var contentMd = document.getElementById("content-md");
 
         function prepContent() {
+
+            document.getElementById("content-md").innerHTML = marked.parse(falsehood.content[falsehood.content.length - 1].contents);
 
             if(!contentToggleEdit || !contentEditorHolder || !updateContentSubmit) return;
 

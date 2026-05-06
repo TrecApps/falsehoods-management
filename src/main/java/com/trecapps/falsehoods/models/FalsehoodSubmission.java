@@ -34,6 +34,7 @@ public class FalsehoodSubmission {
         ret.severity = severity;
 
         ret.getCulprits().addAll(culprits);
+        ret.getTargets().addAll(targets);
 
         ret.title = title;
 
