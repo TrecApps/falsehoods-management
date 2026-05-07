@@ -717,7 +717,7 @@
         titleSubmit.addEventListener("click", () => {
 
           performPatch("title", title.trim(), () => {
-            falsehoods.fullMetaData.title = title.trim();
+            falsehood.fullMetaData.title = title.trim();
             assessTitleDifference();
           });
 
