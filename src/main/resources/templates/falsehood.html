@@ -141,7 +141,11 @@
 
         function updateDate() {
 
-            performPatch("dateMade", falsehood.fullMetaData.dateMade, () => {});
+            performPatch("dateMade", falsehood.fullMetaData.dateMade, () => {
+                document.getElementById("date-group").hidden = true;
+                let newDateMade = falsehood.fullMetaData.dateMade;
+                document.getElementById("current-date-made").textContent = newDateMade || "Not Set";
+            });
 
         }
 

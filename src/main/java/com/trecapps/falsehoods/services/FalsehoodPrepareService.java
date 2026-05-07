@@ -14,6 +14,8 @@ import reactor.core.publisher.Mono;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 import static com.trecapps.falsehoods.services.FalsehoodAuthorities.EMPLOYEE_AUTH;
@@ -294,9 +296,22 @@ public class FalsehoodPrepareService {
                                     case "dateMade":
                                     {
                                         try{
-                                            DateFormat.getDateInstance();
-                                            falsehood.setDateMade(DateFormat.getDateInstance().parse(value[0]));
-                                        }catch(ParseException exception){
+                                            if(value[0] == null)
+                                                falsehood.setDateMade(null);
+                                            else {
+                                                String[] fields = value[0].split("-");
+                                                if(fields.length >=2){
+                                                    LocalDate newDate = LocalDate.of(
+                                                            Integer.parseInt(fields[0]),
+                                                            Integer.parseInt(fields[1]),
+                                                            Integer.parseInt(fields[2])
+                                                    );
+                                                    falsehood.setDateMade(
+                                                            Date.from(newDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+                                                    );
+                                                }
+                                            }
+                                        }catch(NumberFormatException exception){
                                             if(!attemptSetBrowserDate(falsehood, value[0]))
                                                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Argument of '%s' cannot be applied to a date", value[0]));
                                         }
