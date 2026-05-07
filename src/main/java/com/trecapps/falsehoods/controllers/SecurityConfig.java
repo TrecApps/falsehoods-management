@@ -32,6 +32,8 @@ public class SecurityConfig {
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/brands-update-api", "/ArticleEdit/**").hasAuthority("RESOURCE_EMPLOYEE")
+                        .pathMatchers("/Falsehood-api/**", "/Brief/**", "/falsehood-review-api/**").hasAuthority("USER_REQUEST")
+                        .pathMatchers(HttpMethod.GET, "/falsehood-search-api").hasAuthority("USER_REQUEST")
                         .anyExchange().permitAll())
                 .securityContextRepository(trecSecurityContext)
 

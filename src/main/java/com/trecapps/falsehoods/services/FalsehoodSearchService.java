@@ -176,6 +176,7 @@ public class FalsehoodSearchService {
                                     ret1.setSeverity(doc.getSeverity());
                                     ret1.setTitle(doc.getTitle());
                                     ret1.setShowBrand(doc.getShowBrand());
+                                    ret1.setStatus(doc.getStatus());
 
                                     ret1.setCulprits(getBrands(doc.getCulprits(), brandSet));
                                     ret1.setTargets(getBrands(doc.getTargets(), brandSet));
@@ -195,7 +196,7 @@ public class FalsehoodSearchService {
             int page,
             int size
     ){
-        Criteria criteria = Criteria.where("uCreator").is(userId);
+        Criteria criteria = Criteria.where("_uCreator").is(userId);
         if(status != null){
             criteria = new Criteria().andOperator(
                     criteria,

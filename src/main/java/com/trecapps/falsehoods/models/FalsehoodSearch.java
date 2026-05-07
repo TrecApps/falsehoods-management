@@ -30,6 +30,8 @@ public class FalsehoodSearch {
         if(severity != null)
             criteriaList.add(Criteria.where("severity").is(severity));
 
+        if(stage == null)
+            stage = FalsehoodStage.CONFIRMED;
         criteriaList.add(Criteria.where("status").is(stage));
 
         return new Criteria().andOperator(criteriaList);

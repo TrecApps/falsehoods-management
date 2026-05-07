@@ -29,6 +29,7 @@
 
         var elementContainerSetting = [[${elementContainerSetting}]]
         var elementContainerSettingOrig = [[${elementContainerSetting}]]
+        var url = [[${falsehoodServiceUrl}]]
 
         var searchObject = {
             culprit: null,
@@ -124,6 +125,13 @@
     <div style="height:50px"></div>
 
     <div class="container">
+
+        <div th:if="${list.mainUserAccount != null}" th:class="${elementContainerSetting} + ' element-container form'">
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
+                <button class="btn btn-submit" id="do-self-search" style="width: 100%">Search my Falsehoods</button>
+            </div>
+        </div>
+
         <div th:class="${elementContainerSetting} + ' element-container form'">
             <div th:class="${elementItemSetting} + ' element-item form-group'">
                 <label>Culprits</label>
@@ -133,7 +141,7 @@
         </div>
         <div th:class="${elementContainerSetting} + ' element-container form'">
             <div th:class="${elementItemSetting} + ' element-item form-group'">
-                <label>Culprits</label>
+                <label>Targets</label>
                 <div id="target-holder"></div>
                 <div th:replace="~{fragments/brand-searcher :: brandSearcher('target_brands')}"></div>
             </div>
@@ -176,25 +184,27 @@
                 <p id="date-message" hidden class="btn btn-danger">After Date Cannot be before the Before Date</p>
             </div>
             <div th:class="${elementItemSetting} + ' element-item'">
-                <button class="btn btn-submit" id="do-search">Search</button>
+                <button class="btn btn-submit" id="do-search" style="width: 100%">Search</button>
             </div>
         </div>
 
         <div class="search-container" id="search-container" hidden>
-            <p>Showing {{ (currentSize * currentPage) + 1}} - {{ currentSize * (currentPage + 1) }} Falsehoods</p>
+            <p id="showing-p"></p>
             <div th:class="${elementContainerSetting} + ' element-container'" style="width: 100%;" id="result-holder">
 
             </div>
             <div class="flex-and-center" style="gap: 10px;margin: 10px;">
                 <!--ToDo: Create stylized buttons-->
-                <button type="button" class="arrow-button" id="back-button" (click)="onSwitchPage(false)"><img src="assets/icons/botton-Arrow-B.png" width="90%" height="90%"/>
-                    Previous</button>
+                <button type="button" class="arrow-button" id="back-button" disabled>
+                    <img src="images/icons/botton-Arrow-B.png" width="90%" height="90%"/>
+                    Previous
+                </button>
                 <div>
-                    <p style="margin: auto;">Page {{ currentPage + 1 }}</p>
+                    <p style="margin: auto;" id="page-p"></p>
                 </div>
-                <button type="button" class="arrow-button" id="forward-button" [disabled]="currentPage >= falsehoodCollection.length - 1 && !hasMore()" (click)="onSwitchPage(true)">
+                <button type="button" class="arrow-button" id="forward-button">
                     Next
-                    <img src="assets/icons/botton-Arrow-B.png" width="90%" height="90%" style="transform: rotate(180deg);"/>
+                    <img src="images/icons/botton-Arrow-B.png" width="90%" height="90%" style="transform: rotate(180deg);"/>
                 </button>
             </div>
         </div>
@@ -259,7 +269,11 @@
                 let resultParent = document.createElement("div");
                 resultParent.classList.add("element-item");
                 resultParent.classList.add(elementItemSetting);
-                resultParent.addEventListener("click", () => {});
+                resultParent.addEventListener("click", () => {
+
+                    window.location = `${url}/Falsehood/${result.id}`;
+
+                });
 
                 resultHolder.appendChild(resultParent);
 
@@ -291,7 +305,7 @@
                 pElement.innerHTML = `<b>Status: </b>${result.status}`;
                 detailsDiv.appendChild(pElement);
 
-                if(results.culprits){
+                if(result.culprits){
                     let divBrands = document.createElement("div");
                     divBrands.style.padding = "5px";
                     divBrands.style.width = "100%";
@@ -302,36 +316,16 @@
 
                     let first = true;
 
-                    for(let culprit of results.culprits) {
+                    for(let culprit of result.culprits) {
                         let sp = document.createElement("span");
-                        sp.textContent = first ? `${culprits.names[0]}` : `, ${culprits.names[0]}`;
+                        sp.textContent = first ? `${culprit.brand.names[0]}` : `, ${culprit.brand.names[0]}`;
                         first = false;
                         divBrands.appendChild(sp);
                     }
                     detailsDiv.appendChild(divBrands);
                 }
 
-                if(results.culprits){
-                    let divBrands = document.createElement("div");
-                    divBrands.style.padding = "5px";
-                    divBrands.style.width = "100%";
-
-                    let b = document.createElement("b");
-                    b.textContent = "Culprits:";
-                    divBrands.appendChild(b);
-
-                    let first = true;
-
-                    for(let culprit of results.culprits) {
-                        let sp = document.createElement("span");
-                        sp.textContent = first ? `${culprits.names[0]}` : `, ${culprits.names[0]}`;
-                        first = false;
-                        divBrands.appendChild(sp);
-                    }
-                    detailsDiv.appendChild(divBrands);
-                }
-
-                if(results.targets){
+                if(result.targets){
                     let divBrands = document.createElement("div");
                     divBrands.style.padding = "5px";
                     divBrands.style.width = "100%";
@@ -342,9 +336,9 @@
 
                     let first = true;
 
-                    for(let target of results.targets) {
+                    for(let target of result.targets) {
                         let sp = document.createElement("span");
-                        sp.textContent = first ? `${target.names[0]}` : `, ${target.names[0]}`;
+                        sp.textContent = first ? `${target.brand.names[0]}` : `, ${target.brand.names[0]}`;
                         first = false;
                         divBrands.appendChild(sp);
                     }
@@ -354,10 +348,16 @@
 
             }
 
-            document.getElementById("").disabled = page <= 0;
+            document.getElementById("back-button").disabled = page <= 0;
+            document.getElementById("page-p").textContent = `Page: ${page}`;
+            document.getElementById("forward-button").disabled = size > results.length;
+            document.getElementById("showing-p").textContent = `Showing ${ (size * page) + 1} - ${ size * (page + 1) } Falsehoods`;
         }
 
+        var regSearch = true;
         function performSearch() {
+            regSearch = true;
+
 
             const url = new URL(`${falsehoodServiceUrl}/falsehood-search-api`);
             const params = { page, size };
@@ -375,11 +375,28 @@
                 let results = await response.json();
                 parseResults(results);
             });
+        }
 
+        function performSelfSearch() {
+            regSearch = false;
 
+            const url = new URL(`${falsehoodServiceUrl}/falsehood-search-api`);
+            const params = { page, size };
+
+            // Automatically handles encoding and '?' or '&' symbols
+            url.search = new URLSearchParams(params).toString();
+
+            fetch(url, {
+                method: "GET"
+            }).then(async (response) => {
+                let results = await response.json();
+                parseResults(results);
+            });
         }
 
         doSearch.addEventListener("click", () => {performSearch();});
+
+        let doSelfSearch = document.getElementById("do-self-search");
 
         function onSwitchPage(forward) {
             if(forward) {
@@ -387,9 +404,25 @@
             } else {
                 page--;
             }
-
-            performSearch();
+            if(regSearch) performSearch(); else performSelfSearch();
         }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.getElementById("back-button").addEventListener("click", () => {
+                onSwitchPage(false);
+            });
+
+            document.getElementById("forward-button").addEventListener("click", () => {
+                onSwitchPage(true);
+            });
+
+            if(doSelfSearch) {
+                doSelfSearch.addEventListener("click", () => {
+                    performSelfSearch();
+                });
+            }
+
+        });
 
     </script>
 
