@@ -1,7 +1,7 @@
 .md-editor {
     width: 100%;
     display: flex;
-    flex-flow: row wrap;
+    flex-flow: column;
     border-style: double;
     border-color: darkblue;
     border-radius: 10px;
@@ -14,7 +14,7 @@
     min-width: 320px;
     min-height: 450px;
 
-    /* flex-grow: 1; */
+    flex-grow: 1;
 
     border-style: double;
     border-color: darkblue;
@@ -45,7 +45,7 @@
 
 .md-preview-side {
     min-width: 320px;
-    /* flex-grow: 1; */
+    flex-grow: 1;
     border-style: double;
     border-color: darkblue;
     border-radius: 10px;

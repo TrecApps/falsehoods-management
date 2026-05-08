@@ -499,7 +499,7 @@
 
           <div th:class="${elementItemSetting} + ' element-item form-group'">
             <label for="severity-select">Severity</label>
-            <p th:text="${falsehood.fullMetaData.severity}"></p>
+            <p th:text="${falsehood.fullMetaData.severity}" id="severity-display"></p>
               <div th:if="${canSubEdit || canEmpEdit}">
 
                   <button id="severity-toggle" type="button" class="btn btn-primary">Edit Severity</button>
@@ -800,6 +800,8 @@
                 severityGroup.hidden = !severityGroup.hidden;
             });
 
+            severitySelect.value = falsehood.fullMetaData.severity;
+
             severitySelect.addEventListener("change", (e) => {
                 severitySubmit.hidden = false;
                 falsehood.fullMetaData.severity = e.target.value;
@@ -809,11 +811,18 @@
 
                 performPatch("severity", falsehood.fullMetaData.severity, () => {
                     severitySubmit.hidden = true;
+                    severityGroup.hidden = true;
+                    severityToggleButton.classList.remove("btn-danger");
+                    severityToggleButton.classList.add("btn-primary");
+
+                    document.getElementById("severity-display").textContent = falsehood.fullMetaData.severity;
                 });
 
             });
 
         }
+
+        prepSeverity();
 
 
         // Content Management
