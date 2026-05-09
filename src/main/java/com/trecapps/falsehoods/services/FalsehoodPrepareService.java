@@ -98,7 +98,7 @@ public class FalsehoodPrepareService {
 
                     FalsehoodDocument falsehood = optionalDoc.get();
 
-                    if(falsehood.getUCreator().equals(accountList.getMainUserAccount().getId()))
+                    if(!falsehood.getUCreator().equals(accountList.getMainUserAccount().getId()))
                         // ToDo - this is a breach case, how to handle
                         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Falsehood does not belong to you!");
 

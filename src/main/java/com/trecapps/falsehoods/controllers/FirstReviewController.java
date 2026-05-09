@@ -39,11 +39,9 @@ public class FirstReviewController {
     int credibility;
 
 
-    @PostMapping(value = "/{action:approve|reject|penalize|suggest}",
-                consumes = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/{action:approve|reject|penalize|suggest}")
     Mono<ResponseEntity<ResponseObj>> postFirstReview(Authentication authentication,
                                                  @PathVariable String action,
-                                                 @PathVariable String id,
                                                  @RequestBody SecondReviewSubmission submission
                                                  ){
         AccountList list = ((TrecauthAuthentication)authentication).getList();

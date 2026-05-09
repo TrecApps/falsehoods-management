@@ -175,9 +175,12 @@ public class FirstReviewService {
 //                        //notify(f, action);
 //                    }
 
-                    f.setRecords(
-                            f.getRecords().stream().filter((Record r) -> r.getId() == null).sorted().toList()
-                    );
+//                    SortedSet<Record> records = new TreeSet<>(f.getRecords());
+//                    records.
+//
+//                    f.setRecords(
+//                            f.getRecords().stream().filter((Record r) -> r.getId() == null).sorted().toList()
+//                    );
 
                     return mongoRepo.saveFalsehood(f).thenReturn(ResponseObj.getInstance200("Success!"));
                 });

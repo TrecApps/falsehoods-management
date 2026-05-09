@@ -69,7 +69,14 @@ public class FalsehoodSearchService {
                                 return mongoRepo.retrieveBriefsByFalsehood(falsehoodId)
                                         .collectList()
                                         .map((List<Brief> briefs) -> {
-                                            full.getBriefs().addAll(briefs);
+                                            full
+                                                    .getBriefs()
+                                                    .addAll(
+                                                            briefs
+                                                                    .stream()
+                                                                    .map(Brief::toReturnableObj)
+                                                                    .toList()
+                                                    );
                                             return full;
                                         });
                             });

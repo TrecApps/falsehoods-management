@@ -171,7 +171,7 @@
         function setEditingBrief(doEdit) {
 
             document.getElementById("submit-brief-button").hidden = doEdit;
-            document.getElementById().hidden = !doEdit;
+            document.getElementById("adding-brief-div").hidden = !doEdit;
         }
 
         var briefPurpose = "AFFIRM";
@@ -216,11 +216,13 @@
 
                     let responseObj = await response.json();
 
+                    let user1 = [[${user}]]
+
                     let briefId = responseObj.id;
                     if(briefId) {
                         let brief = {
-                            displayName: user.displayName,
-                            uAccount: user.id,
+                            displayName: user1.displayName,
+                            uAccount: user1.id,
                             id: briefId,
                             purpose: briefPurpose,
                             content: [{
@@ -237,7 +239,7 @@
 
         }
 
-        function onSubmit(){
+        function submitBrief(){
 
             let onSuccess = () => {
                 initMarkdownEditor("briefEditor", briefTempContent);
@@ -276,14 +278,16 @@
             submitterDiv.appendChild(submitterP);
             ret.appendChild(submitterDiv);
 
-            if(user?.id == brief.uAccount){
+            let user1 = [[${user}]]
+
+            if(user1?.id == brief.uAccount){
                 let editButton = document.createElement("button");
                 editButton.id = `edit-brief-${brief.id}`;
                 editButton.value = brief.id;
                 editButton.classList.add("btn");
                 editButton.classList.add("btn-primary");
 
-                editButton.addActionListener("click", (e) => {
+                editButton.addEventListener("click", (e) => {
                     briefId = editButton.value;
                     briefTempContent = window['briefEditor_content'];
                     window['briefEditor_content'] = brief.content[brief.content.length - 1].contents;
@@ -319,6 +323,7 @@
             markdownDiv.classList.add("md-preview-side");
             markdownDiv.id = `brief-${brief.id}`
             markdownDiv.innerHTML = marked.parse(brief.content[brief.content.length - 1].contents);
+            ret.appendChild(markdownDiv);
 
             return ret;
         }
@@ -329,12 +334,14 @@
         var reviewComment = "";
         var reviewPoints = 5;
 
+        const reviewOptions = [[${reviewOptions}]]
+
         function evaluateReviewParams(){
             document.getELementById('submit-review').disabled = !reviewVerdict || reviewComment.trim().length == 0;
          }
 
         function setVerdict(v) {
-            reviewVerdict = v;
+            reviewVerdict = reviewOptions[v];
 
             document.getElementById("deduct-points-panel").hidden = (reviewVerdict != 'deny');
             evaluateReviewParams();
@@ -590,18 +597,18 @@
     <div th:insert="~{fragments/up-slider :: upSlider('reviewSlider', 10, 'Review Falsehood', ~{::reviewBody})}">
         <form th:ref="reviewBody">
             <div th:class="${elementItemSetting} + ' element-item form-group'">
-                <div th:each="reviewOption : ${reviewOptions}" class="form-check">
+                <div th:each="reviewOption, optionIndex : ${reviewOptions}" class="form-check">
                     <input
                             class="form-check-input"
                             type="radio"
                             th:value="${reviewOption}"
-                            th:onchange="|setVerdict('${reviewOption}')"
+                            th:onclick="'setVerdict(' + ${optionIndex.index} + ')'"
                             name="actionSelection"
-                            th:id="'act-select-'+ ${reviewOption}"
+                            th:id="'act-select-'+ ${optionIndex.index}"
                     >
                     <label
                             class="form-check-label"
-                            th:for="'act-select-'+ ${reviewOption}"
+                            th:for="'act-select-'+ ${optionIndex.index}"
                             th:text="${reviewOption}"
                     ></label>
                 </div>
@@ -656,6 +663,18 @@
         document.addEventListener('DOMContentLoaded', (event) => {
                 resetBrandList("culprits", falsehood.fullMetaData.culprits);
                 resetBrandList("targets", falsehood.fullMetaData.targets);
+
+                let briefList = falsehood.briefs;
+
+                if(briefList){
+
+                    for(let b of briefList){
+
+                        document.getElementById("brief-container").appendChild(generateBriefElement(b));
+
+                    }
+
+                }
         });
 
 
@@ -868,6 +887,8 @@
 
                     toggleContentEdit();
                     refreshContentDiv();
+
+                    contentMd.hidden = false;
                 });
 
             })

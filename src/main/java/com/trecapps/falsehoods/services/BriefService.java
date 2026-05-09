@@ -129,8 +129,8 @@ public class BriefService {
 
                     List<String> authRoles = accountList.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
-                    if(!authRoles.contains(FALSEHOOD_SUB) && !authRoles.contains(EMPLOYEE_AUTH))
-                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You need to be an employee or have the '(Subscription name here)' active");
+//                    if(!authRoles.contains(FALSEHOOD_SUB) && !authRoles.contains(EMPLOYEE_AUTH))
+//                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You need to be an employee or have the '(Subscription name here)' active");
 
                     brief.update(newContent);
 

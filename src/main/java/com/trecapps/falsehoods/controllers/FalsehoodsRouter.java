@@ -19,10 +19,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class FalsehoodsRouter extends BaseRouter{
@@ -187,6 +184,17 @@ public class FalsehoodsRouter extends BaseRouter{
             dataMap.put("isAccepted", fRet.getStatus() == FalsehoodStage.ACCEPTED);
             dataMap.put("canAddBrief", list != null && briefService.canLeaveBrief(fRet, list));
             dataMap.put("blankString", "");
+            List<String> reviewOptions = new ArrayList<>();
+            if(fRet.getStatus() == FalsehoodStage.SUBMITTED){
+                reviewOptions.add("approve");
+                reviewOptions.add("reject");
+                reviewOptions.add("penalize");
+                reviewOptions.add("suggest");
+            } else if(fRet.getStatus() == FalsehoodStage.ACCEPTED){
+                reviewOptions.add("confirm");
+                reviewOptions.add("deny");
+            }
+            dataMap.put("reviewOptions", reviewOptions);
 
 
             return ServerResponse.ok().render("falsehood", dataMap);

@@ -40,8 +40,8 @@ public class MongoRepo {
             @Qualifier("trecappsFalsehoodsMongoTemplate") ReactiveMongoTemplate template,
             @Value("${trecapps.mongo.brands.collection:brands}") String brandsCollection1,
             @Value("${trecapps.mongo.falsehoods.collection:falsehoods}") String falsehoodsCollection1,
-            @Value("${trecapps.mongo.records.collection:brands}") String falsehoodRecordsCollection1,
-            @Value("${trecapps.mongo.briefs.collection:image-profiles}") String briefsCollection1
+            @Value("${trecapps.mongo.records.collection:f-records}") String falsehoodRecordsCollection1,
+            @Value("${trecapps.mongo.briefs.collection:briefs}") String briefsCollection1
     ){
         this.template = template;
         this.brandsCollection = brandsCollection1;
@@ -111,12 +111,8 @@ public class MongoRepo {
     }
 
     Flux<FalsehoodRecord> saveRecords(Collection<Record> records){
-        return this.template.insertAll(Mono.just(records).map((Collection<Record> r) -> {
-            return r
-                    .stream()
-                    .map(FalsehoodRecord::getInstance)
-                    .toList();
-        }), this.falsehoodRecordsCollection);
+        return Flux.fromIterable(records)
+                .flatMap((Record r) -> this.template.save(FalsehoodRecord.getInstance(r), this.falsehoodRecordsCollection));
     }
 
     Flux<Brief> retrieveBriefsByFalsehood(UUID falsehoodId){

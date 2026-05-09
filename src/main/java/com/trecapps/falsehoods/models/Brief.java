@@ -5,6 +5,9 @@ import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -29,6 +32,28 @@ public class Brief implements Comparable<Brief> {
     Instant created;
 
     SortedSet<ContentVersion> content = new TreeSet<>();
+
+    public BriefRet toReturnableObj(){
+        BriefRet ret = new BriefRet();
+        ret.id = this.id;
+        ret.falsehoodId = this.falsehoodId;
+        ret.uAccount = this.uAccount;
+        ret.account = this.account;
+        ret.version = this.version;
+        ret.displayName = this.displayName;
+        ret.purpose = this.purpose;
+        ret.created = OffsetDateTime.ofInstant(this.created, ZoneId.systemDefault());
+
+        for(ContentVersion cv : content){
+            ret.content.add(
+                    new ContentVersionRet(
+                            cv.version(),
+                            OffsetDateTime.ofInstant(cv.made(), ZoneId.systemDefault()),
+                            cv.contents()));
+        }
+
+        return ret;
+    }
 
     public void filter(UUID userId){
         if(userId != null && (userId.equals(this.uAccount) || userId.equals(this.account)))

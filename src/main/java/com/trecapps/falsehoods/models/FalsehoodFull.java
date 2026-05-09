@@ -18,7 +18,7 @@ public class FalsehoodFull {
     SortedSet<ContentVersion> content = new TreeSet<>();
     String initContent;
 
-    SortedSet<Brief> briefs = new TreeSet<>();
+    SortedSet<BriefRet> briefs = new TreeSet<>();
 
     public void prepReturn(){
         this.metadata = null;
@@ -45,7 +45,7 @@ public class FalsehoodFull {
      */
     public void filter(UUID userId){
 
-        for(Brief brief: briefs)
+        for(BriefRet brief: briefs)
             brief.filter(userId);
 
         if(userId == null || !userId.equals(metadata.uCreator)) {
