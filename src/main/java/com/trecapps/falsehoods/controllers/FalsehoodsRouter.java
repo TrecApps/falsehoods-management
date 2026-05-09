@@ -59,6 +59,7 @@ public class FalsehoodsRouter extends BaseRouter{
         AccountList list = data.getAccountList();
         UserAccount userAccount = list == null ? null : list.getMainUserAccount();
         dataMap.put("list", list);
+        dataMap.put("user", list == null ? null : list.getMainUserAccount());
         dataMap.put("imageServiceUrl", imageUrl);
         dataMap.put("falsehoodServiceUrl", falsehoodsUrl);
         dataMap.put("userServiceUrl", loginUrl);

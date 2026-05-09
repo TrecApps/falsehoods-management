@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class BaseRouter {
@@ -39,15 +40,33 @@ public class BaseRouter {
         }
     }
 
+    String getElementStyleAsLinkedHashMap(Object style){
+        try{
+            LinkedHashMap<?, ?> stylesMap = (LinkedHashMap<?, ?>) style;
+            Boolean useDark = (Boolean) stylesMap.get("useDark");
+            String styleStr = stylesMap.get("style").toString();
+
+            if(useDark != null && useDark)
+                styleStr = "dark-" + styleStr;
+            return styleStr;
+        } catch(Exception ignore){
+            return null;
+        }
+    }
+
     String getElementStyle(String defaultStyle, Object style){
         try{
+            String ret = getElementStyleAsLinkedHashMap(style);
+            if(ret != null) return "element-container-" + ret;
+
+
             Class<?> styleClass = style.getClass();
             Field field = styleClass.getField("useDark");
             field.setAccessible(true);
             boolean useDark = field.getBoolean(style);
             field = styleClass.getField("style");
             String styleStr = field.get(style).toString();
-            String ret = "element-container";
+            ret = "element-container";
             if(useDark)
                 ret = ret + "-dark";
             return ret + "-" + styleStr;

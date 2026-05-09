@@ -121,20 +121,19 @@ public class BriefService {
                     return mongoRepo.retrieveBriefById(briefId);
                 })
                 .flatMap((Brief brief) -> {
-                    if(brief == null)
-                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Brief does not exist!");
 
                     if(!brief.getUAccount().equals(accountList.getMainUserAccount().getId()))
                         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You did not make this brief! If you used a Brand Account, you need to use that Brand Account to edit");
 
                     List<String> authRoles = accountList.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
-//                    if(!authRoles.contains(FALSEHOOD_SUB) && !authRoles.contains(EMPLOYEE_AUTH))
-//                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You need to be an employee or have the '(Subscription name here)' active");
+                    if(!authRoles.contains(FALSEHOOD_SUB) && !authRoles.contains(EMPLOYEE_AUTH))
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You need to be an employee or have the '(Subscription name here)' active");
 
                     brief.update(newContent);
 
                     return mongoRepo.saveBrief(brief).thenReturn(ResponseObj.getInstance200("Success"));
-                });
+                })
+                .defaultIfEmpty(ResponseObj.getInstance(HttpStatus.NOT_FOUND, "Brief does not exist!", null));
     }
 }

@@ -13,6 +13,21 @@
 
         var user = [[${user}]]
 
+        function toggleProfilePanel(e, hide) {
+            let profilePanel = document.getElementById("top-bar-prof-panel");
+
+            if(hide) {
+                profilePanel.opacity = 0;
+                setTimeout(() => {profilePanel.hidden = true}, 0.33)
+            } else {
+                profilePanel.opacity = 1;
+                profilePanel.hidden = false;
+                e.stopPropagation();
+            }
+
+
+        }
+
         function topBarOnBrandSelected(result){
             let url =  [[${falsehoodServiceUrl}]];
             window.location = `${url}/Article/${result.brand.id}`;
@@ -67,6 +82,28 @@
             persistButton.disabled = elementItemSetting == elementItemSettingOrig;
         }
 
+        function resetPopupBackground() {
+            // Extract current Style
+            let currentStyle = elementItemSetting.split('-');
+            currentStyle = currentStyle[currentStyle.length -1];
+
+            let useDark = elementItemSetting.includes("dark");
+            if(useDark){
+                currentStyle = `dark-${currentStyle}`;
+            }
+
+            // Get Popup backgrounds to replace
+            let popupBackgrounds = document.getElementsByClassName("popup-background");
+
+            // perform the change
+            for(let popupBackground of popupBackgrounds){
+
+                popupBackground.className  = `popup-background popup-background-${currentStyle}`;
+
+            }
+
+        }
+
         function onUseDarkChecked(event){
             let useDark = event.target.checked;
 
@@ -95,16 +132,17 @@
             elementContainerSetting = newContainerStyle;
 
             areStylesDifferent();
+            resetPopupBackground();
         }
 
         function onSetNewColorStyle(colorName){
             // Extract current Style
             let currentItemStyle = elementItemSetting.split('-');
-            currentItemStyle[currentStyle.length -1] = colorName;
+            currentItemStyle[currentItemStyle.length -1] = colorName;
             currentItemStyle = currentItemStyle.join('-');
 
             let currentContainerStyle = elementContainerSetting.split('-');
-            currentContainerStyle[currentStyle.length -1] = colorName;
+            currentContainerStyle[currentItemStyle.length -1] = colorName;
             currentContainerStyle = currentContainerStyle.join('-');
 
             let elements = document.getElementsByClassName(elementItemSetting);
@@ -122,7 +160,10 @@
             elementContainerSetting = currentContainerStyle;
 
             areStylesDifferent();
+            resetPopupBackground();
         }
+
+
 
         document.addEventListener('DOMContentLoaded', (event) => {
 
@@ -138,6 +179,7 @@
                 });
                 colorPanel.appendChild(colorButton);
             }
+            resetPopupBackground();
 
         });
 
@@ -154,7 +196,7 @@
             }
 
             let baseUserUrl = [[${userServiceUrl}]];
-            fetch(`${baseUserUrl}/accounts/styles`, {
+            fetch(`${baseUserUrl}/accounts/styles?app=Falsehoods-Service`, {
                 method: "PATCH",
                 body: JSON.stringify(body),
                 headers: {
@@ -165,6 +207,8 @@
                 elementContainerSettingOrig = elementContainerSetting;
             })
         }
+
+
 
     </script>
 
@@ -240,7 +284,7 @@
         <div
             th:if="${list != null}"
             class="profile-section"
-
+            onclick="toggleProfilePanel(event, false)"
         >
             <div class="profile-img">
                 <img th:src="${profilePic}">
@@ -252,7 +296,9 @@
 
 
         <div th:class="${elementContainerSetting} + ' profile-panel element-container'"
+             id="top-bar-prof-panel"
              hidden
+             style="{opacity: 0}"
         >
             <div>
                 <div
@@ -380,7 +426,7 @@
     <div th:replace="~{fragments/popup :: popup('stylesPopup', 50, 'Set Style', ~{::styleBody})}">
         <div th:ref="styleBody">
             <div class="color-panel" id="color-panel"></div>
-            <div class="form-group">
+            <div class="form-group" style="background-color: rgba(255,255,255,1.0);padding: 5px;">
                 <input
                         id="style-dark-checkbox"
                         type="checkbox"
@@ -390,7 +436,7 @@
                 <label class="form-check-label">Use Dark mode</label>
                 <div th:class="${elementItemSetting} + ' element-item'" style="height: 10px"></div>
 
-                <button th:if="${user != null}" id="persist-style-button" disabled class="btn btn-primary" onclick="updateStyle()"> Persist Style</button>
+                <button th:if="${user != null}" id="persist-style-button" disabled class="btn btn-primary" onclick="updateStyle(event)"> Persist Style</button>
 
             </div>
         </div>
@@ -415,6 +461,11 @@
 
         document.addEventListener('DOMContentLoaded', (event) => {
             document.getElementById("style-dark-checkbox").checked = elementContainerSetting.includes("dark");
+
+            window.addEventListener("click", (e) => {
+                toggleProfilePanel(e, true);
+            });
+
         });
 
 

@@ -16,8 +16,23 @@
         <link href="styles/nav-bar.css" rel="stylesheet" />
         <link href="styles/tc-styles.css" rel="stylesheet" />
 
+        <link href="styles/popup.css" rel="stylesheet" />
+        <link href="styles/color-picker.css" rel="stylesheet" />
+        <script src="js/popup.js" defer></script>
+
     </head>
     <body>
+
+    <script th:inline="javascript">
+        const falsehoodServiceUrl = [[${falsehoodServiceUrl}]]
+
+        var elementItemSetting = [[${elementItemSetting}]]
+        var elementItemSettingOrig = [[${elementItemSetting}]]
+
+        var elementContainerSetting = [[${elementContainerSetting}]]
+        var elementContainerSettingOrig = [[${elementContainerSetting}]]
+
+    </script>
 
     <div th:replace="~{fragments/topbar :: bar}"></div>
     <div style="height:50px"></div>

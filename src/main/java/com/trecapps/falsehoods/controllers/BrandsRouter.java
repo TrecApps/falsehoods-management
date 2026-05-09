@@ -60,6 +60,7 @@ public class BrandsRouter extends BaseRouter{
         Map<String, Object> dataMap = new HashMap<>();
         AccountList list = data.getAccountList();
         dataMap.put("list", list);
+        dataMap.put("user", list == null ? null : list.getMainUserAccount());
         dataMap.put("imageServiceUrl", imageUrl);
         dataMap.put("falsehoodServiceUrl", falsehoodsUrl);
         dataMap.put("userServiceUrl", loginUrl);
