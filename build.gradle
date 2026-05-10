@@ -32,6 +32,11 @@ repositories {
     }
 }
 
+jar{
+    //archiveClassifier=''
+    enabled = false
+}
+
 dependencies {
     implementation 'org.projectlombok:lombok:1.18.42'
     annotationProcessor 'org.projectlombok:lombok:1.18.42'
