@@ -315,7 +315,7 @@
             metadataTable.appendChild(row);
         }
 
-        function onSubmit() {
+        function onSubmit(e) {
 
             let postObject = {
                 content: brandContent,
@@ -323,6 +323,10 @@
             };
 
             postObject.content.content = window['contentEditor_content'] || postObject.content.content;
+
+            let button = e.target;
+            button.disabled = true;
+            button.classList.add("button-dis");
 
             fetch(`${falsehoodServiceUrl}/brands-update-api`, {
                 method: "POST",
@@ -343,7 +347,10 @@
                 let id = responseObj.id;
                 window.location = `${falsehoodServiceUrl}/Article/${id}`;
 
-            }).catch(() => {alert("Failed to save object")});
+            }).catch(() => {
+                button.disabled = false;
+                button.classList.remove("button-dis");
+                alert("Failed to save object")});
 
         }
 

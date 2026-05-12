@@ -46,7 +46,12 @@
         culprits: falsehood.fullMetaData.culprits
       };
 
-      function performPatch(field, value, onSuccess) {
+      function performPatch(field, value, button, onSuccess) {
+
+        if(button) {
+            button.disabled = true;
+            button.classList.add("button-dis");
+        }
 
 
         fetch(`${falsehoodServiceUrl}/Falsehood-api/${falsehood.fullMetaData.id}`, {
@@ -64,6 +69,11 @@
                         onSuccess();
                     }
 
+                }).finally(() => {
+                    if(button) {
+                        button.disabled = false;
+                        button.classList.remove("button-dis");
+                    }
                 });
 
       }
@@ -98,7 +108,7 @@
 
                 let removeDiv = document.createElement("div");
                 removeDiv.addEventListener("click", () => {
-                    performPatch(`${elementId}-remove`, brand.brand.id, () => {
+                    performPatch(`${elementId}-remove`, brand.brand.id, undefined, () => {
 
                        falsehood.fullMetaData[elementId] = falsehood.fullMetaData[elementId].filter((b) => b.brand.id != brand.brand.id);
                        brandsTracker[elementId] = falsehood.fullMetaData[elementId];
@@ -121,7 +131,7 @@
 
             let which = "culprits";
 
-            performPatch(which, result.brand.id, () => {
+            performPatch(which, result.brand.id, undefined, () => {
                 falsehood.fullMetaData[which].push(result);
                 brandsTracker[which] = falsehood.fullMetaData[which];
                 resetBrandList(which, falsehood.fullMetaData[which]);
@@ -131,7 +141,7 @@
         function targetsOnBrandSelected(result){
             let which = "targets";
 
-            performPatch(which, result.brand.id, () => {
+            performPatch(which, result.brand.id, undefined, () => {
                 falsehood.fullMetaData[which].push(result);
                 brandsTracker[which] = falsehood.fullMetaData[which];
                 resetBrandList(which, falsehood.fullMetaData[which]);
@@ -142,9 +152,9 @@
         window["culprit_brands_onBrandSelected"] = culpritsOnBrandSelected;
         window["target_brands_onBrandSelected"] = targetsOnBrandSelected;
 
-        function updateDate() {
+        function updateDate(e) {
 
-            performPatch("dateMade", falsehood.fullMetaData.dateMade, () => {
+            performPatch("dateMade", falsehood.fullMetaData.dateMade, e.target, () => {
                 document.getElementById("date-group").hidden = true;
                 let newDateMade = falsehood.fullMetaData.dateMade;
                 document.getElementById("current-date-made").textContent = newDateMade || "Not Set";
@@ -182,7 +192,10 @@
         var briefId = undefined;
         var briefTempContent = "";
 
-        function submitBriefChanges(onSuccess) {
+        function submitBriefChanges(button, onSuccess) {
+
+            button.disabled = true;
+            button.classList.add("button-dis");
 
             fetch(`${falsehoodServiceUrl}/Brief/${falsehood.fullMetaData.id}/${briefId}`, {
                 method: "PUT",
@@ -198,16 +211,21 @@
 
                 onSuccess();
 
+            }).finally(() => {
+                button.disabled = false;
+                button.classList.remove("button-dis");
             });
-
         }
 
-        function submitNewBrief(onSuccess) {
+        function submitNewBrief(button, onSuccess) {
 
             let body = {
                     type: briefPurpose,
                     content: window['briefEditor_content']
                 };
+            
+            button.disabled = true;
+            button.classList.add("button-dis");
 
             fetch(`${falsehoodServiceUrl}/Brief/${falsehood.fullMetaData.id}`, {
                 method: "POST",
@@ -238,11 +256,14 @@
                     }
 
                     onSuccess();
-                });
+                }).finally(() => {
+                button.disabled = false;
+                button.classList.remove("button-dis");
+            });;
 
         }
 
-        function submitBrief(){
+        function submitBrief(e){
 
             let onSuccess = () => {
                 initMarkdownEditor("briefEditor", briefTempContent);
@@ -255,9 +276,9 @@
             };
 
             if(briefId) {
-                submitBriefChanges(onSuccess);
+                submitBriefChanges(e.target, onSuccess);
             } else {
-                submitNewBrief(onSuccess);
+                submitNewBrief(e.target, onSuccess);
             }
 
         }
@@ -360,13 +381,16 @@
             reviewPoints = parseInt(value) || Number(value);
         }
 
-        function submitReview() {
+        function submitReview(e) {
 
             let body = {
                 falsehoodId: falsehood.fullMetaData.id,
                 comment: reviewComment,
                 denyPoints: reviewPoints // this will be ignored if not sending "deny" command
             };
+            let button = e.target;
+            button.disabled = true;
+            button.classList.add("button-dis");
 
             fetch(`${falsehoodServiceUrl}/falsehood-review-api/${reviewVerdict}`, {
                 method: "POST",
@@ -376,6 +400,9 @@
                 }
             }).then(async(response) => {
                 window.location.reload();
+            }).finally(() => {
+                button.disabled = false;
+                button.classList.remove("button-dis");
             });
 
         }
@@ -391,9 +418,13 @@
             appealComment = e.target.value;
         }
 
-        function submitAppeal(){
+        function submitAppeal(e){
 
             let appealLevel = falsehood.fullMetaData.status == "REJECTED" ? 1 : 2;
+            let button = e.target;
+
+            button.disabled = true;
+            button.classList.add("button-dis");
 
             fetch(`${falsehoodServiceUrl}/falsehood-review-api/appeal-${appealLevel}`, {
                 method: "POST",
@@ -403,15 +434,28 @@
                 }
             }).then(async(response) => {
                 window.location.reload();
+            }).finally(() => {
+                button.disabled = false;
+                button.classList.remove("button-dis");
             });
         }
 
         // Make Submitted
 
-        function makeSubmitted(){
+        function makeSubmitted(e){
+
+            let button = e.target;
+            button.disabled = true;
+            button.classList.add("button-dis");
+
             fetch(`${falsehoodServiceUrl}/Falsehood-api/submit/${falsehood.fullMetaData.id}`, {
                 method: "GET"
             }).then(() => window.location.reload())
+            .catch(() => {
+                button.disabled = false;
+                button.classList.remove("button-dis");
+                alert("Failed to submit falsehood. Please try again or contact an administrator if the problem persists.");
+            });
         }
 
 
@@ -451,7 +495,7 @@
           >Appeal</button>
           <button th:if="${canSubmit}" type="button"
                   class="btn btn-primary"
-                  onclick="makeSubmitted()"
+                  onclick="makeSubmitted(event)"
           >Submit</button>
         </div>
 
@@ -499,7 +543,7 @@
 
               <label class="form-check-label" for="date-control">Use Date</label>
               <input id="date-control" type="date" name="date">
-              <button id="date-submit" type="button" class="btn btn-light" onclick="updateDate()">Update Date</button>
+              <button id="date-submit" type="button" class="btn btn-light" onclick="updateDate(event)">Update Date</button>
             </div>
 
 
@@ -585,7 +629,7 @@
               </select>
               <div th:replace="~{fragments/markdown-editor :: markdownEditor('briefEditor', '')}"></div>
               <button type="button" class="btn btn-danger" onclick="setEditingBrief(false)">Cancel</button>
-              <button type="button" class="btn btn-primary" onclick="submitBrief()">Submit</button>
+              <button type="button" class="btn btn-primary" onclick="submitBrief(event)">Submit</button>
           </div>
 
           <hr>
@@ -638,7 +682,7 @@
                         style="margin-left: 10px"
                 >
             </div>
-            <button id="submit-review" type="button" class="btn btn-primary" onclick="submitReview()">Post Review</button>
+            <button id="submit-review" type="button" class="btn btn-primary" onclick="submitReview(event)">Post Review</button>
 
         </form>
     </div>
@@ -655,7 +699,7 @@
                 ></textarea>
             </div>
 
-            <button type="button" id="submit-appeal" class="btn btn-primary" onclick="submitAppeal()">Post Appeal</button>
+            <button type="button" id="submit-appeal" class="btn btn-primary" onclick="submitAppeal(event)">Post Appeal</button>
         </form>
     </div>
 
@@ -736,9 +780,9 @@
           });
         }
 
-        titleSubmit.addEventListener("click", () => {
+        titleSubmit.addEventListener("click", (e) => {
 
-          performPatch("title", title.trim(), () => {
+          performPatch("title", title.trim(), e.target,() => {
             falsehood.fullMetaData.title = title.trim();
             assessTitleDifference();
           });
@@ -829,9 +873,9 @@
                 falsehood.fullMetaData.severity = e.target.value;
             });
 
-            severitySubmit.addEventListener("click", () => {
+            severitySubmit.addEventListener("click", (e) => {
 
-                performPatch("severity", falsehood.fullMetaData.severity, () => {
+                performPatch("severity", falsehood.fullMetaData.severity, e.target, () => {
                     severitySubmit.hidden = true;
                     severityGroup.hidden = true;
                     severityToggleButton.classList.remove("btn-danger");
@@ -880,9 +924,9 @@
                 toggleContentEdit();
             });
 
-            updateContentSubmit.addEventListener("click", () => {
+            updateContentSubmit.addEventListener("click", (e) => {
 
-                performPatch("content", window['contentEditor_content'], () => {
+                performPatch("content", window['contentEditor_content'], e.target, () => {
                     let contentDetails = falsehood.fullMetaData.content;
                     if(contentDetails && contentDetails.length){
                         contentDetails[contentDetails.length - 1].contents = window['contentEditor_content'];
