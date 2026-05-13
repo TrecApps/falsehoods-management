@@ -67,7 +67,7 @@ public class FalsehoodsRouter extends BaseRouter{
         dataMap.put("credibility", userAccount == null ? BigInteger.ZERO : userAccount.getCredibility());
         //dataMap.put("isResourceEmployee", list != null && list.getMainAccount().getPermissions().contains("RESOURCE_EMPLOYEE"));
         if(list != null){
-            String profilePic = String.format("%s/profile/%s", this.imageUrl, list.getMainAccount().getId());
+            String profilePic = String.format("%s/Images/profile/%s", this.imageUrl, list.getMainAccount().getId());
             dataMap.put("profilePic", profilePic);
         }
 
