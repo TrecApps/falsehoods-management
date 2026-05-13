@@ -359,9 +359,11 @@
         }
 
         var regSearch = true;
-        function performSearch() {
+        function performSearch(button) {
             regSearch = true;
 
+            button.disabled = true;
+            button.classList.add("button-dis");
 
             const url = new URL(`${falsehoodServiceUrl}/falsehood-search-api`);
             const params = { page, size };
@@ -378,10 +380,13 @@
             }).then(async (response) => {
                 let results = await response.json();
                 parseResults(results);
-            });
+            }).finally(() => {
+                button.disabled = false;
+                button.classList.remove("button-dis");
+             });
         }
 
-        function performSelfSearch() {
+        function performSelfSearch(button) {
             regSearch = false;
 
             const url = new URL(`${falsehoodServiceUrl}/falsehood-search-api`);
@@ -390,34 +395,40 @@
             // Automatically handles encoding and '?' or '&' symbols
             url.search = new URLSearchParams(params).toString();
 
+            button.disabled = true;
+            button.classList.add("button-dis");
+
             fetch(url, {
                 method: "GET"
             }).then(async (response) => {
                 let results = await response.json();
                 parseResults(results);
-            });
+            }).finally(() => {
+                button.disabled = false;
+                button.classList.remove("button-dis");
+             });
         }
 
         doSearch.addEventListener("click", () => {performSearch();});
 
         let doSelfSearch = document.getElementById("do-self-search");
 
-        function onSwitchPage(forward) {
+        function onSwitchPage(forward, button) {
             if(forward) {
                 page++;
             } else {
                 page--;
             }
-            if(regSearch) performSearch(); else performSelfSearch();
+            if(regSearch) performSearch(button); else performSelfSearch(button);
         }
 
         document.addEventListener('DOMContentLoaded', (event) => {
-            document.getElementById("back-button").addEventListener("click", () => {
-                onSwitchPage(false);
+            document.getElementById("back-button").addEventListener("click", (e) => {
+                onSwitchPage(false, e.target);
             });
 
-            document.getElementById("forward-button").addEventListener("click", () => {
-                onSwitchPage(true);
+            document.getElementById("forward-button").addEventListener("click", (e) => {
+                onSwitchPage(true, e.target);
             });
 
             if(doSelfSearch) {

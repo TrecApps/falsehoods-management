@@ -13,6 +13,28 @@
     }
 }
 
+.btn-primary {
+    border: 2px solid rgba(13, 110, 253, 0.7);
+}
+
+.button-dis {
+                
+    box-shadow: 0 0 10px rgba(13, 110, 253, 0.7);
+    animation: throb 1.5s infinite;
+    opacity: 1.0;
+}
+
+@keyframes throb {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(13, 110, 253, 0.4);
+        opacity: 0.4;
+    }
+    50% {
+        box-shadow: 0 0 8px rgba(13, 110, 253, 1);
+        opacity: 0.8;
+    }
+}
+
 .element-container-default {
     background-color: rgb(209, 209, 209);
     color: black;

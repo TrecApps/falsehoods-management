@@ -174,10 +174,13 @@
 
     let submittingReview = false;
 
-    function submitReview() {
+    function submitReview(e) {
         if(submittingReview) return;
 
         submittingReview = true;
+        let button = e.target;
+        button.disabled = true;
+        button.classList.add("button-dis");
 
         fetch(`${falsehoodServiceUrl}/brands-update-api`, {
                 method: 'PUT',
@@ -210,7 +213,10 @@
             }).catch(() => {
                 submittingReview = false;
                 alert("Failed to submit review!");
-            });
+            }).finally(() => {
+                button.disabled = false;
+                button.classList.remove("button-dis");
+             });
     }
 
 </script>
