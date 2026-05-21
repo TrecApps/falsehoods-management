@@ -24,7 +24,7 @@ public class FalsehoodSearchController {
     @PostMapping
     Mono<ResponseEntity<List<FalsehoodRet>>> doSearch(
             @RequestBody FalsehoodSearch search,
-            @RequestParam(defaultValue = "CONFIRMED") FalsehoodStage status,
+            @RequestParam(required = false) FalsehoodStage status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
             ){

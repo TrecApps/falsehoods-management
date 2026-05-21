@@ -45,7 +45,7 @@ dependencies {
 
     // Basic Security help
     implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-azure', version: '0.0.50')
-    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-core', version: '0.0.50')
+    //implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-core', version: '0.0.50')
     implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-mongo', version: '0.0.50')
 
     // Security Dependencies

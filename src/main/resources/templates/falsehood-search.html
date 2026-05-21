@@ -43,6 +43,8 @@
             severity: null
         };
 
+        var falsehoodStatus = null;
+
         const falsehoodsSeverityOptions = [
             {value: "OBJECTIVE", desc: "The claim is objectively false."},
             {value: "OPPOSING_EVIDENCE_WITHHELD", desc: "The claim is undermined by evidence hidden from the audience/readers"},
@@ -123,6 +125,10 @@
 
             document.findElementById("severity-desc").textContent = desc;
         }
+
+        function statusSelected(e){
+            falsehoodStatus = e.target.value;
+        }
     </script>
     <div th:replace="~{fragments/topbar :: bar}"></div>
 
@@ -130,27 +136,36 @@
 
     <div class="container">
 
-        <div th:if="${list.mainUserAccount != null}" th:class="${elementContainerSetting} + ' element-container form'">
+        <div th:if="${list != null && list.mainUserAccount != null}" th:class="${elementContainerSetting} + ' element-container form'">
             <div th:class="${elementItemSetting} + ' element-item form-group'">
                 <button class="btn btn-submit" id="do-self-search" style="width: 100%">Search my Falsehoods</button>
             </div>
         </div>
 
         <div th:class="${elementContainerSetting} + ' element-container form'">
+
+            <div th:class="${elementItemSetting} + ' element-item form-group'">
+                <label for="status-selection" class="form-label">Falsehood Status</label>
+                <select id="status-selection" class="form-select" onchange="statusSelected(e)">
+                    <option value="ALL">No Selection</option>
+                    <option value="CONFIRMED">Confirmed</option>
+                    <option value="DENIED">Denied</option>
+                    <option value="ACCEPTED">Accepted</option>
+                    <option value="REJECTED">Rejected</option>
+                    <option value="SUBMITTED">Submitted</option>
+                </select>
+            </div>
+
             <div th:class="${elementItemSetting} + ' element-item form-group'">
                 <label>Culprits</label>
                 <div id="culprit-holder"></div>
                 <div th:replace="~{fragments/brand-searcher :: brandSearcher('culprit_brands')}"></div>
             </div>
-        </div>
-        <div th:class="${elementContainerSetting} + ' element-container form'">
             <div th:class="${elementItemSetting} + ' element-item form-group'">
                 <label>Targets</label>
                 <div id="target-holder"></div>
                 <div th:replace="~{fragments/brand-searcher :: brandSearcher('target_brands')}"></div>
             </div>
-        </div>
-        <div th:class="${elementContainerSetting} + ' element-container form'">
             <div th:class="${elementItemSetting} + ' element-item form-group'">
                 <p id="severity-desc"></p>
             </div>
@@ -167,8 +182,6 @@
                         <option value="TITLE_OR_SLOGAN">Title or Slogan</option>
                     </select>
             </div>
-        </div>
-        <div th:class="${elementContainerSetting} + ' element-container form'">
             <div th:class="${elementItemSetting} + ' element-item form-group'">
                 <label for="before-input" class="form-label">Before Date (inclusive)</label>
                 <p id="before-label"></p>
@@ -181,9 +194,6 @@
                 <input id="after-input" type="date" class="form-control">
                 <button id="remove-after" class="btn btn-danger">Remove</button>
             </div>
-        </div>
-
-        <div th:class="${elementContainerSetting} + ' element-container form'">
             <div th:class="${elementItemSetting} + ' element-item'">
                 <p id="date-message" hidden class="btn btn-danger">After Date Cannot be before the Before Date</p>
             </div>
@@ -368,12 +378,16 @@
             const url = new URL(`${falsehoodServiceUrl}/falsehood-search-api`);
             const params = { page, size };
 
+            if(falsehoodStatus && falsehoodStatus != "ALL"){
+                params["status"] = falsehoodStatus;
+            }
+
             // Automatically handles encoding and '?' or '&' symbols
             url.search = new URLSearchParams(params).toString();
 
             fetch(url, {
                 method: "POST",
-                body: JSON.stringify(postObject),
+                body: JSON.stringify(searchObject),
                 headers: {
                     "Content-Type": "application/json"
                 }
@@ -409,7 +423,7 @@
              });
         }
 
-        doSearch.addEventListener("click", () => {performSearch();});
+        doSearch.addEventListener("click", (e) => {performSearch(e.target);});
 
         let doSelfSearch = document.getElementById("do-self-search");
 
