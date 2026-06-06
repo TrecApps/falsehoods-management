@@ -23,11 +23,11 @@ repositories {
     mavenCentral()
 
     maven {
-        url trecappsUrl
-        name 'TcMavenRepo'
+        url azureRepoUrl
+        name 'tcMavenRepo'
         credentials {
-            username trecappsRepoUsername
-            password trecappsRepoPassword
+            username azureRepoUsername
+            password azureRepoPassword
         }
     }
 }
