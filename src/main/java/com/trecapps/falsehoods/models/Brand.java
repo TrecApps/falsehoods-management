@@ -13,6 +13,7 @@ import java.util.UUID;
  * Represents an entity to which Falsehoods can be attributed
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Brand extends Resource {
 
     /**

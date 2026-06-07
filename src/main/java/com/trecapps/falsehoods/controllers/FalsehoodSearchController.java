@@ -1,5 +1,6 @@
 package com.trecapps.falsehoods.controllers;
 
+import com.trecapps.falsehoods.models.FalsehoodQueryResult;
 import com.trecapps.falsehoods.models.FalsehoodRet;
 import com.trecapps.falsehoods.models.FalsehoodSearch;
 import com.trecapps.falsehoods.models.FalsehoodStage;
@@ -22,7 +23,7 @@ public class FalsehoodSearchController {
     FalsehoodSearchService searchService;
 
     @PostMapping
-    Mono<ResponseEntity<List<FalsehoodRet>>> doSearch(
+    Mono<ResponseEntity<FalsehoodQueryResult>> doSearch(
             @RequestBody FalsehoodSearch search,
             @RequestParam(required = false) FalsehoodStage status,
             @RequestParam(defaultValue = "0") int page,
@@ -36,7 +37,7 @@ public class FalsehoodSearchController {
     }
 
     @GetMapping
-    Mono<ResponseEntity<List<FalsehoodRet>>> doSearch(
+    Mono<ResponseEntity<FalsehoodQueryResult>> doSearch(
             Authentication authentication,
             @RequestParam(required = false) Optional<FalsehoodStage> status,
             @RequestParam(defaultValue = "0") int page,
