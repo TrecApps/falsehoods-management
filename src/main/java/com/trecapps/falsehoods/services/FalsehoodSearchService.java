@@ -250,10 +250,17 @@ public class FalsehoodSearchService {
     ){
         MatchOperation matchOperation = new MatchOperation(search.generateCriteria(status));
 
-        Aggregation aggregation = Aggregation.newAggregation(
-                matchOperation,
+        FacetOperation facetOperation = facet(
                 Aggregation.skip((long) page * size),
                 Aggregation.limit(size)
+        ).as("results")
+                .and(
+                        count().as("count")
+                ).as("totalCount");
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                matchOperation,
+                facetOperation
         );
 
 

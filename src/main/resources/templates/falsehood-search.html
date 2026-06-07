@@ -283,7 +283,7 @@
 
         function parseResults(resultsQuery) {
             let results = resultsQuery.results;
-            let totalCount = getTotalCount(resultsQuery.totalCount);
+            let totalCount = resultsQuery.totalCountPrimitive;
             document.getElementById("search-container").hidden = false;
             let resultHolder = document.getElementById("result-holder");
             resultHolder.replaceChildren();
@@ -375,7 +375,7 @@
             document.getElementById("back-button").disabled = page <= 0;
             document.getElementById("page-p").textContent = `Page: ${page}`;
             document.getElementById("forward-button").disabled = size > results.length;
-            document.getElementById("showing-p").textContent = `Showing ${ (size * page) + 1} - ${ size * (page + 1) }  of ${totalCount} Falsehoods`;
+            document.getElementById("showing-p").textContent = `Showing ${ (size * page) + 1} - ${ Math.min(size * (page + 1), totalCount) }  of ${totalCount} Falsehoods`;
         }
 
         var regSearch = true;
