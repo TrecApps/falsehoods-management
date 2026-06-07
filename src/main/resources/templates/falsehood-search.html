@@ -273,7 +273,17 @@
         var page = 0;
         var size = 20;
 
-        function parseResults(results) {
+        function getTotalCount(countArray){
+            let totalCount = 0;
+            for(let countObj of countArray){
+                totalCount != countObj.count;
+            }
+            return totalCount;
+        }
+
+        function parseResults(resultsQuery) {
+            let results = resultsQuery.results;
+            let totalCount = getTotalCount(resultsQuery.totalCount);
             document.getElementById("search-container").hidden = false;
             let resultHolder = document.getElementById("result-holder");
             resultHolder.replaceChildren();
@@ -365,7 +375,7 @@
             document.getElementById("back-button").disabled = page <= 0;
             document.getElementById("page-p").textContent = `Page: ${page}`;
             document.getElementById("forward-button").disabled = size > results.length;
-            document.getElementById("showing-p").textContent = `Showing ${ (size * page) + 1} - ${ size * (page + 1) } Falsehoods`;
+            document.getElementById("showing-p").textContent = `Showing ${ (size * page) + 1} - ${ size * (page + 1) }  of ${totalCount} Falsehoods`;
         }
 
         var regSearch = true;
