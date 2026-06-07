@@ -104,7 +104,11 @@ public class MongoRepo {
     Mono<FalsehoodQueryDocuments> searchFalsehoods(Aggregation aggregation){
         return this.template.aggregate(aggregation, this.falsehoodsCollection, FalsehoodQueryDocuments.class)
                 .next();
+    }
 
+    Mono<BrandFalsehoodCount> searchFalsehoodCountByBrand(Aggregation aggregation){
+        return this.template.aggregate(aggregation, this.falsehoodsCollection, BrandFalsehoodCount.class)
+                .next();
     }
 
     Flux<FalsehoodRecord> findAllRecordsByFalsehoodId(UUID id){

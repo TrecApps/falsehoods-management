@@ -2,18 +2,15 @@ package com.trecapps.falsehoods.services;
 
 import com.trecapps.falsehoods.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.FacetOperation;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.count;
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.facet;
-
 import java.util.*;
+
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
 @Service
 public class FalsehoodSearchService {
@@ -265,5 +262,40 @@ public class FalsehoodSearchService {
 
 
         return searchAggregation(aggregation);
+    }
+
+    MatchOperation getMatchOp(UUID brand, boolean isCulprit, FalsehoodStage stage){
+        List<Criteria> criteriaList = new ArrayList<>(2);
+
+        criteriaList.add(Criteria.where(isCulprit ? "culprits" : "targets").is(brand));
+        criteriaList.add(Criteria.where("status").is(stage));
+        return new MatchOperation(new Criteria().andOperator(criteriaList));
+    }
+
+    public Mono<BrandFalsehoodTable> searchCountByBrand(UUID brand){
+        MatchOperation acceptedCulprit = getMatchOp(brand, true, FalsehoodStage.ACCEPTED);
+        MatchOperation confirmedCulprit = getMatchOp(brand, true, FalsehoodStage.CONFIRMED);
+        MatchOperation acceptedTarget = getMatchOp(brand, false, FalsehoodStage.ACCEPTED);
+        MatchOperation confirmedTarget = getMatchOp(brand, false, FalsehoodStage.CONFIRMED);
+
+        GroupOperation groupOperation = group("severity").count().as("count");
+        ProjectionOperation projectOp = project("count").and("severity").previousOperation();
+
+        FacetOperation operation = facet(
+                        acceptedCulprit, groupOperation, projectOp
+                ).as("acceptedCulpritCount")
+                .and(
+                        confirmedCulprit, groupOperation, projectOp
+                ).as("confirmedCulpritCount")
+                .and(
+                        acceptedTarget, groupOperation, projectOp
+                ).as("acceptedTargetCount")
+                .and(
+                        confirmedTarget, groupOperation, projectOp
+                ).as("confirmedTargetName");
+
+        return this.mongoRepo.searchFalsehoodCountByBrand(Aggregation.newAggregation(operation))
+                .map(BrandFalsehoodTable::new);
+
     }
 }
