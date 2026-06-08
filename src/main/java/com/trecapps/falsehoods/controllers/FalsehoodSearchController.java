@@ -1,8 +1,6 @@
 package com.trecapps.falsehoods.controllers;
 
-import com.trecapps.falsehoods.models.FalsehoodRet;
-import com.trecapps.falsehoods.models.FalsehoodSearch;
-import com.trecapps.falsehoods.models.FalsehoodStage;
+import com.trecapps.falsehoods.models.*;
 import com.trecapps.falsehoods.services.FalsehoodSearchService;
 import com.trecauth.common.model.TrecauthAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +11,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequestMapping("/falsehood-search-api")
 @RestController
@@ -22,7 +21,7 @@ public class FalsehoodSearchController {
     FalsehoodSearchService searchService;
 
     @PostMapping
-    Mono<ResponseEntity<List<FalsehoodRet>>> doSearch(
+    Mono<ResponseEntity<FalsehoodQueryResult>> doSearch(
             @RequestBody FalsehoodSearch search,
             @RequestParam(required = false) FalsehoodStage status,
             @RequestParam(defaultValue = "0") int page,
@@ -36,7 +35,7 @@ public class FalsehoodSearchController {
     }
 
     @GetMapping
-    Mono<ResponseEntity<List<FalsehoodRet>>> doSearch(
+    Mono<ResponseEntity<FalsehoodQueryResult>> doSearch(
             Authentication authentication,
             @RequestParam(required = false) Optional<FalsehoodStage> status,
             @RequestParam(defaultValue = "0") int page,
@@ -48,6 +47,12 @@ public class FalsehoodSearchController {
                 status.orElse(null),
                 page,
                 size)
+                .map(ResponseEntity::ok);
+    }
+
+    @GetMapping("/count-by-brand/{id}")
+    Mono<ResponseEntity<BrandFalsehoodTable>> searchCountByBrand(@PathVariable UUID id){
+        return searchService.searchCountByBrand(id)
                 .map(ResponseEntity::ok);
     }
 

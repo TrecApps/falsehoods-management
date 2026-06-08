@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trecapps.falsehoods.models.*;
 import com.trecapps.falsehoods.services.BrandService;
+import com.trecapps.falsehoods.services.FalsehoodSearchService;
 import com.trecapps.falsehoods.services.WelcomeService;
 import com.trecauth.common.model.AccountList;
 import com.trecauth.common.model.TrecauthAuthentication;
 import com.trecauth.common.model.UserAccount;
+import lombok.Data;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +38,9 @@ public class BrandsRouter extends BaseRouter{
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    FalsehoodSearchService falsehoodSearchService;
 
     @Value("${trecapps.image.url}")
     String imageUrl;
@@ -178,6 +183,70 @@ public class BrandsRouter extends BaseRouter{
             dataMap.put("brandName", complete.getMetadata().getNames().getFirst());
 
             return ServerResponse.ok().render("Article", dataMap);
+        });
+    }
+
+    @Data
+    static class FalsehoodsFCountCombo {
+        BrandComplete complete;
+        BrandFalsehoodTable table;
+    }
+
+    public Mono<ServerResponse> brandFalsehoodCountPage(ServerRequest request) {
+        String id = getPathVariable("id", request);
+        if(id == null){
+            return ServerResponse.badRequest().bodyValue("'id' is a required path variable!");
+
+        }
+        Mono<FrontendData<FalsehoodsFCountCombo>> thData = this.prepareData();
+        thData = thData.flatMap((FrontendData<FalsehoodsFCountCombo> frontendData) -> {
+            boolean hasAccess = false;
+            // ToDo - determine if requester has access
+
+            //
+            return brandService.retrieveBrand(hasAccess, UUID.fromString(id))
+                    .flatMap((BrandComplete complete) -> {
+                        FalsehoodsFCountCombo combo = new FalsehoodsFCountCombo();
+                        combo.complete = complete;
+                        frontendData.setData(combo);
+
+                        return this.falsehoodSearchService.searchCountByBrand(UUID.fromString(id))
+                                .map((BrandFalsehoodTable table)-> {
+                                    frontendData.getData().table = table;
+                                    return frontendData;
+                                });
+
+                    });
+        });
+
+        return thData.flatMap((FrontendData<FalsehoodsFCountCombo> data) -> {
+            Map<String, Object> dataMap = getDataMap(data);
+
+            FalsehoodsFCountCombo combo = data.getData();
+
+            boolean isResourceEmployee = false;
+            if(data.getAccountList() != null){
+                AccountList list = data.getAccountList();
+                isResourceEmployee = list
+                        .getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList()
+                        .contains("RESOURCE_EMPLOYEE");
+            }
+            // ToDo - determine if requester has access
+
+            dataMap.put("reviewStage", combo.complete.getMetadata().getReviewStage().toString());
+            dataMap.put("isResourceEmployee", isResourceEmployee);
+            dataMap.put("brandPic",combo.complete.getContent().getImageData());
+            dataMap.put("imgDesc", combo.complete.getContent().getImageDescription());
+            dataMap.put("entries", combo.complete.getContent().getMetaDataAsEntries());
+            dataMap.put("brandContent", combo.complete.getContent().getContent());
+            dataMap.put("brandId", id);
+            dataMap.put("brandName", combo.complete.getMetadata().getNames().getFirst());
+            dataMap.put("falsehoodCountTable", combo.table);
+
+            return ServerResponse.ok().render("Falsehood-by-brand", dataMap);
         });
     }
 

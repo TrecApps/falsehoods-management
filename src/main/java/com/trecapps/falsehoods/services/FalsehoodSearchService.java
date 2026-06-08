@@ -2,14 +2,15 @@ package com.trecapps.falsehoods.services;
 
 import com.trecapps.falsehoods.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
+
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
 @Service
 public class FalsehoodSearchService {
@@ -136,10 +137,12 @@ public class FalsehoodSearchService {
                 });
     }
 
-    Mono<List<FalsehoodRet>> searchAggregation(Aggregation aggregation){
+    Mono<FalsehoodQueryResult> searchAggregation(Aggregation aggregation){
         return mongoRepo.searchFalsehoods(aggregation)
-                .collectList()
-                .flatMap((List<FalsehoodDocument> docs) -> {
+                .flatMap((FalsehoodQueryDocuments docAndCount) -> {
+
+                    List<FalsehoodDocument> docs = docAndCount.getResults();
+
                     SortedSet<UUID> brandIds = new TreeSet<>();
                     for(FalsehoodDocument doc: docs){
                         brandIds.addAll(doc.getCulprits());
@@ -192,12 +195,18 @@ public class FalsehoodSearchService {
                                 }
 
                                 return ret;
+                            })
+                            .map((List<FalsehoodRet> rets) -> {
+                                FalsehoodQueryResult ret = new FalsehoodQueryResult();
+                                ret.setResults(rets);
+                                ret.setTotalCount(docAndCount.getTotalCount());
+                                return ret;
                             });
 
                 });
     }
 
-    public Mono<List<FalsehoodRet>> searchFalsehoods(
+    public Mono<FalsehoodQueryResult> searchFalsehoods(
             UUID userId,
             FalsehoodStage status,
             int page,
@@ -212,11 +221,17 @@ public class FalsehoodSearchService {
         }
 
         MatchOperation matchOperation = new MatchOperation(criteria);
+        FacetOperation facetOperation = facet(
+                Aggregation.skip((long) page * size),
+                Aggregation.limit(size)
+        ).as("results")
+                .and(
+                        count().as("count")
+                ).as("totalCount");
 
         Aggregation aggregation = Aggregation.newAggregation(
                 matchOperation,
-                Aggregation.skip((long) page * size),
-                Aggregation.limit(size)
+                facetOperation
         );
 
         return searchAggregation(aggregation);
@@ -224,7 +239,7 @@ public class FalsehoodSearchService {
 
 
 
-    public Mono<List<FalsehoodRet>> searchFalsehoods(
+    public Mono<FalsehoodQueryResult> searchFalsehoods(
             FalsehoodSearch search,
             FalsehoodStage status,
             int page,
@@ -232,13 +247,55 @@ public class FalsehoodSearchService {
     ){
         MatchOperation matchOperation = new MatchOperation(search.generateCriteria(status));
 
-        Aggregation aggregation = Aggregation.newAggregation(
-                matchOperation,
+        FacetOperation facetOperation = facet(
                 Aggregation.skip((long) page * size),
                 Aggregation.limit(size)
+        ).as("results")
+                .and(
+                        count().as("count")
+                ).as("totalCount");
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                matchOperation,
+                facetOperation
         );
 
 
         return searchAggregation(aggregation);
+    }
+
+    MatchOperation getMatchOp(UUID brand, boolean isCulprit, FalsehoodStage stage){
+        List<Criteria> criteriaList = new ArrayList<>(2);
+
+        criteriaList.add(Criteria.where(isCulprit ? "culprits" : "targets").is(brand));
+        criteriaList.add(Criteria.where("status").is(stage));
+        return new MatchOperation(new Criteria().andOperator(criteriaList));
+    }
+
+    public Mono<BrandFalsehoodTable> searchCountByBrand(UUID brand){
+        MatchOperation acceptedCulprit = getMatchOp(brand, true, FalsehoodStage.ACCEPTED);
+        MatchOperation confirmedCulprit = getMatchOp(brand, true, FalsehoodStage.CONFIRMED);
+        MatchOperation acceptedTarget = getMatchOp(brand, false, FalsehoodStage.ACCEPTED);
+        MatchOperation confirmedTarget = getMatchOp(brand, false, FalsehoodStage.CONFIRMED);
+
+        GroupOperation groupOperation = group("severity").count().as("count");
+        ProjectionOperation projectOp = project("count").and("severity").previousOperation();
+
+        FacetOperation operation = facet(
+                        acceptedCulprit, groupOperation, projectOp
+                ).as("acceptedCulpritCount")
+                .and(
+                        confirmedCulprit, groupOperation, projectOp
+                ).as("confirmedCulpritCount")
+                .and(
+                        acceptedTarget, groupOperation, projectOp
+                ).as("acceptedTargetCount")
+                .and(
+                        confirmedTarget, groupOperation, projectOp
+                ).as("confirmedTargetName");
+
+        return this.mongoRepo.searchFalsehoodCountByBrand(Aggregation.newAggregation(operation))
+                .map(BrandFalsehoodTable::new);
+
     }
 }
