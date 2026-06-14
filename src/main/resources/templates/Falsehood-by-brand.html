@@ -252,7 +252,7 @@
     function performSearch() {
         const url = new URL(`${falsehoodServiceUrl}/falsehood-search-api`);
         const params = { page, size };
-        if (status) {
+        if (status && status != "null") {
             params["status"] = status;
         }
         url.search = new URLSearchParams(params).toString();
