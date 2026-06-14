@@ -82,25 +82,34 @@
             }
 
             function transferToPage() {
-                const queryString = window.location.search;
-                const urlParams = new URLSearchParams(queryString);
-
-                let targetEndpoint = "/Welcome";
+                const ALLOWLIST = [
+                    '/Welcome',
+                    '/FalsehoodSearch',
+                    '/Falsehood/',
+                    '/Article/',
+                    '/ArticleEdit',
+                    '/FalsehoodSubmit',
+                    '/FalsehoodByBrand/'
+                ];
 
                 let gatewayPath = "[[${gatewayPath}]]";
+                let redirectTarget = "[[${redirectTarget}]]";
 
-                let target = urlParams.get("target");
-
-                if(target) {
-                    switch(target) {
-                        case "":
-
-                        break;
-                    }
+                // Reject protocol-relative and absolute URLs
+                if (!redirectTarget || redirectTarget.indexOf('://') !== -1 || !redirectTarget.startsWith('/')) {
+                    document.location.href = `${gatewayPath}/Welcome`;
+                    return;
                 }
 
+                // Validate against the internal-routes allowlist
+                const isAllowed = ALLOWLIST.some(prefix => redirectTarget.startsWith(prefix));
 
-                document.location.href = `${gatewayPath}${targetEndpoint}`
+                if (!isAllowed) {
+                    document.location.href = `${gatewayPath}/Welcome`;
+                    return;
+                }
+
+                document.location.href = `${gatewayPath}${redirectTarget}`;
             }
 
             function checkLoginReady() {

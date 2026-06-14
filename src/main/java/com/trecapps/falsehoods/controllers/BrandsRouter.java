@@ -130,6 +130,8 @@ public class BrandsRouter extends BaseRouter{
             dataMap.put("brandContent", complete.getContent());
             dataMap.put("metadata", complete.getMetadata());
 
+            dataMap.put("currentURI", request.uri().getPath());
+
             return ServerResponse.ok().render("ArticleEdit", dataMap);
         });
 
@@ -181,6 +183,9 @@ public class BrandsRouter extends BaseRouter{
             dataMap.put("brandContent", complete.getContent().getContent());
             dataMap.put("brandId", id);
             dataMap.put("brandName", complete.getMetadata().getNames().getFirst());
+
+
+            dataMap.put("currentURI", request.uri().getPath());
 
             return ServerResponse.ok().render("Article", dataMap);
         });
@@ -246,6 +251,8 @@ public class BrandsRouter extends BaseRouter{
             dataMap.put("brandName", combo.complete.getMetadata().getNames().getFirst());
             dataMap.put("falsehoodCountTable", combo.table);
 
+            dataMap.put("currentURI", request.uri().getPath());
+
             return ServerResponse.ok().render("Falsehood-by-brand", dataMap);
         });
     }
@@ -261,6 +268,9 @@ public class BrandsRouter extends BaseRouter{
             Map<String, Object> dataMap = getDataMap(data);
 
             dataMap.put("guidelines", data.getData());
+
+
+            dataMap.put("currentURI", request.uri().getPath());
 
             return ServerResponse.ok().render("Welcome", dataMap);
 

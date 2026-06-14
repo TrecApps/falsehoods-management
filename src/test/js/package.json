@@ -1,0 +1,14 @@
+{
+  "name": "login-redirect-property-tests",
+  "version": "1.0.0",
+  "description": "Property-based tests for transferToPage redirect logic",
+  "private": true,
+  "scripts": {
+    "test": "node computeRedirect.unit.test.js && node transferToPage.property.test.js",
+    "test:unit": "node computeRedirect.unit.test.js",
+    "test:property": "node transferToPage.property.test.js"
+  },
+  "devDependencies": {
+    "fast-check": "3.22.0"
+  }
+}

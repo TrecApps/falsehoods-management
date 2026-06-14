@@ -80,6 +80,7 @@ public class FalsehoodsRouter extends BaseRouter{
 
         return thData.flatMap((FrontendData<Object> data) -> {
             Map<String, Object> dataMap = getDataMap(data);
+            dataMap.put("currentURI", request.uri().getPath());
             return ServerResponse.ok().render("falsehood-search", dataMap);
         });
     }
@@ -89,6 +90,7 @@ public class FalsehoodsRouter extends BaseRouter{
 
         return thData.flatMap((FrontendData<Object> data) -> {
             Map<String, Object> dataMap = getDataMap(data);
+            dataMap.put("currentURI", request.uri().getPath());
             return ServerResponse.ok().render("falsehood-submit", dataMap);
         });
     }
@@ -161,6 +163,8 @@ public class FalsehoodsRouter extends BaseRouter{
 
         return thData.flatMap((FrontendData<FalsehoodFull> data) -> {
             Map<String, Object> dataMap = getDataMap(data);
+
+            dataMap.put("currentURI", request.uri().getPath());
 
             FalsehoodFull complete = data.getData();
             AccountList list = data.getAccountList();

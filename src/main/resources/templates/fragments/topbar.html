@@ -317,10 +317,16 @@
             </div>
         </div>
 
-        <a
-            th:if="${list == null}"
-            href="Login"
-        >
+        <a th:if="${list == null}"
+           th:with="isKnownRoute=(${currentURI == '/Welcome'
+                               or currentURI == '/FalsehoodSearch'
+                               or currentURI == '/ArticleEdit'
+                               or currentURI == '/FalsehoodSubmit'
+                               or #strings.startsWith(currentURI, '/Article/')
+                               or #strings.startsWith(currentURI, '/Falsehood/')
+                               or #strings.startsWith(currentURI, '/ArticleEdit/')
+                               or #strings.startsWith(currentURI, '/FalsehoodByBrand/')})"
+           th:href="${isKnownRoute} ? @{Login(target=${currentURI})} : @{/Login}">
             <button class="btn btn-primary desktop-login" style="height: 100%">Log in</button>
         </a>
 
