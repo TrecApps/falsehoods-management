@@ -19,6 +19,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.*;
 
 @Component
@@ -89,6 +90,16 @@ public class FalsehoodsRouter extends BaseRouter{
         Mono<FrontendData<Object>> thData = this.prepareData();
 
         return thData.flatMap((FrontendData<Object> data) -> {
+
+            if(data.getAccountList() == null){
+                // User is not logged on
+                return ServerResponse.temporaryRedirect(
+                        URI.create(
+                                String.format("Login?%s=%s", "target", request.uri().getPath())
+                        )
+                ).build();
+            }
+
             Map<String, Object> dataMap = getDataMap(data);
             dataMap.put("currentURI", request.uri().getPath());
             return ServerResponse.ok().render("falsehood-submit", dataMap);
