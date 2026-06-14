@@ -51,68 +51,71 @@
             </div>
 
             <div class="rs-metadata-holder rs-table-holder">
-                <table>
-                    <tr>
-                        <td rowspan="2">Severity</td>
-                        <td colspan="2">Culprit</td>
-                        <td colspan="2">Target</td>
-                    </tr>
-                    <tr>
-                        <td id="culprit-accept-col">Accepted</td>
-                        <td id="culprit-confirm-col">Confirmed</td>
-                        <td id="target-accept-col">Accepted</td>
-                        <td id="target-confirm-col">Confirmed</td>
-                    </tr>
-                    <tr>
-                        <td>Opposing Evidence Withheld</td>
-                        <td th:text="${falsehoodCountTable.acceptedCulpritCount.OPPOSING_EVIDENCE_WITHHELD}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedCulpritCount.OPPOSING_EVIDENCE_WITHHELD}"></td>
-                        <td th:text="${falsehoodCountTable.acceptedTargetCount.OPPOSING_EVIDENCE_WITHHELD}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedTargetCount.OPPOSING_EVIDENCE_WITHHELD}"></td>
-                    </tr>
-                    <tr>
-                        <td>Supporting Evidence Withheld</td>
-                        <td th:text="${falsehoodCountTable.acceptedCulpritCount.SUPPORTING_EVIDENCE_WITHHELD}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedCulpritCount.SUPPORTING_EVIDENCE_WITHHELD}"></td>
-                        <td th:text="${falsehoodCountTable.acceptedTargetCount.SUPPORTING_EVIDENCE_WITHHELD}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedTargetCount.SUPPORTING_EVIDENCE_WITHHELD}"></td>
-                    </tr>
-                    <tr>
-                        <td>Subjective</td>
-                        <td th:text="${falsehoodCountTable.acceptedCulpritCount.SUBJECTIVE}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedCulpritCount.SUBJECTIVE}"></td>
-                        <td th:text="${falsehoodCountTable.acceptedTargetCount.SUBJECTIVE}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedTargetCount.SUBJECTIVE}"></td>
-                    </tr>
-                    <tr>
-                        <td>Narrative Issue</td>
-                        <td th:text="${falsehoodCountTable.acceptedCulpritCount.NARRATIVE_ISSUE}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedCulpritCount.NARRATIVE_ISSUE}"></td>
-                        <td th:text="${falsehoodCountTable.acceptedTargetCount.NARRATIVE_ISSUE}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedTargetCount.NARRATIVE_ISSUE}"></td>
-                    </tr>
-                    <tr>
-                        <td>Faulty Logic</td>
-                        <td th:text="${falsehoodCountTable.acceptedCulpritCount.FAULTY_LOGIC}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedCulpritCount.FAULTY_LOGIC}"></td>
-                        <td th:text="${falsehoodCountTable.acceptedTargetCount.FAULTY_LOGIC}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedTargetCount.FAULTY_LOGIC}"></td>
-                    </tr>
-                    <tr>
-                        <td>Title/Sloagan</td>
-                        <td th:text="${falsehoodCountTable.acceptedCulpritCount.TITLE_OR_SLOGAN}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedCulpritCount.TITLE_OR_SLOGAN}"></td>
-                        <td th:text="${falsehoodCountTable.acceptedTargetCount.TITLE_OR_SLOGAN}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedTargetCount.TITLE_OR_SLOGAN}"></td>
-                    </tr>
-                    <tr>
-                        <td>Objective</td>
-                        <td th:text="${falsehoodCountTable.acceptedCulpritCount.TITLE_OR_SLOGAN}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedCulpritCount.TITLE_OR_SLOGAN}"></td>
-                        <td th:text="${falsehoodCountTable.acceptedTargetCount.TITLE_OR_SLOGAN}"></td>
-                        <td th:text="${falsehoodCountTable.confirmedTargetCount.TITLE_OR_SLOGAN}"></td>
-                    </tr>
-
+                <table id="falsehood-count-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Severity</th>
+                            <th colspan="2" id="culprit-header" style="cursor:pointer;" title="Search all culprit falsehoods">Culprit</th>
+                            <th colspan="2" id="target-header" style="cursor:pointer;" title="Search all target falsehoods">Target</th>
+                        </tr>
+                        <tr>
+                            <th id="culprit-accept-col" style="cursor:pointer;" title="Search accepted culprit falsehoods">Accepted</th>
+                            <th id="culprit-confirm-col" style="cursor:pointer;" title="Search confirmed culprit falsehoods">Confirmed</th>
+                            <th id="target-accept-col" style="cursor:pointer;" title="Search accepted target falsehoods">Accepted</th>
+                            <th id="target-confirm-col" style="cursor:pointer;" title="Search confirmed target falsehoods">Confirmed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-severity="OPPOSING_EVIDENCE_WITHHELD">
+                            <td class="severity-cell" style="cursor:pointer;" title="Search all falsehoods in this category">Opposing Evidence Withheld</td>
+                            <td class="count-cell" data-culprit="true" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedCulpritCount.OPPOSING_EVIDENCE_WITHHELD}"></td>
+                            <td class="count-cell" data-culprit="true" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedCulpritCount.OPPOSING_EVIDENCE_WITHHELD}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedTargetCount.OPPOSING_EVIDENCE_WITHHELD}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedTargetCount.OPPOSING_EVIDENCE_WITHHELD}"></td>
+                        </tr>
+                        <tr data-severity="SUPPORTING_EVIDENCE_WITHHELD">
+                            <td class="severity-cell" style="cursor:pointer;" title="Search all falsehoods in this category">Supporting Evidence Withheld</td>
+                            <td class="count-cell" data-culprit="true" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedCulpritCount.SUPPORTING_EVIDENCE_WITHHELD}"></td>
+                            <td class="count-cell" data-culprit="true" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedCulpritCount.SUPPORTING_EVIDENCE_WITHHELD}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedTargetCount.SUPPORTING_EVIDENCE_WITHHELD}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedTargetCount.SUPPORTING_EVIDENCE_WITHHELD}"></td>
+                        </tr>
+                        <tr data-severity="SUBJECTIVE">
+                            <td class="severity-cell" style="cursor:pointer;" title="Search all falsehoods in this category">Subjective</td>
+                            <td class="count-cell" data-culprit="true" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedCulpritCount.SUBJECTIVE}"></td>
+                            <td class="count-cell" data-culprit="true" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedCulpritCount.SUBJECTIVE}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedTargetCount.SUBJECTIVE}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedTargetCount.SUBJECTIVE}"></td>
+                        </tr>
+                        <tr data-severity="NARRATIVE_ISSUE">
+                            <td class="severity-cell" style="cursor:pointer;" title="Search all falsehoods in this category">Narrative Issue</td>
+                            <td class="count-cell" data-culprit="true" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedCulpritCount.NARRATIVE_ISSUE}"></td>
+                            <td class="count-cell" data-culprit="true" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedCulpritCount.NARRATIVE_ISSUE}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedTargetCount.NARRATIVE_ISSUE}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedTargetCount.NARRATIVE_ISSUE}"></td>
+                        </tr>
+                        <tr data-severity="FAULTY_LOGIC">
+                            <td class="severity-cell" style="cursor:pointer;" title="Search all falsehoods in this category">Faulty Logic</td>
+                            <td class="count-cell" data-culprit="true" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedCulpritCount.FAULTY_LOGIC}"></td>
+                            <td class="count-cell" data-culprit="true" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedCulpritCount.FAULTY_LOGIC}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedTargetCount.FAULTY_LOGIC}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedTargetCount.FAULTY_LOGIC}"></td>
+                        </tr>
+                        <tr data-severity="TITLE_OR_SLOGAN">
+                            <td class="severity-cell" style="cursor:pointer;" title="Search all falsehoods in this category">Title / Slogan</td>
+                            <td class="count-cell" data-culprit="true" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedCulpritCount.TITLE_OR_SLOGAN}"></td>
+                            <td class="count-cell" data-culprit="true" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedCulpritCount.TITLE_OR_SLOGAN}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedTargetCount.TITLE_OR_SLOGAN}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedTargetCount.TITLE_OR_SLOGAN}"></td>
+                        </tr>
+                        <tr data-severity="OBJECTIVE">
+                            <td class="severity-cell" style="cursor:pointer;" title="Search all falsehoods in this category">Objective</td>
+                            <td class="count-cell" data-culprit="true" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedCulpritCount.OBJECTIVE}"></td>
+                            <td class="count-cell" data-culprit="true" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedCulpritCount.OBJECTIVE}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="ACCEPTED" style="cursor:pointer;" th:text="${falsehoodCountTable.acceptedTargetCount.OBJECTIVE}"></td>
+                            <td class="count-cell" data-culprit="false" data-status="CONFIRMED" style="cursor:pointer;" th:text="${falsehoodCountTable.confirmedTargetCount.OBJECTIVE}"></td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -146,108 +149,89 @@
 
     let brandId = [[${brandId}]]
 
-    function getTotalCount(countArray){
-        let totalCount = 0;
-        for(let countObj of countArray){
-            totalCount != countObj.count;
-        }
-        return totalCount;
-    }
     function parseResults(resultsQuery) {
-            let results = resultsQuery.results;
-            let totalCount = resultsQuery.totalCountPrimitive;
-            document.getElementById("search-container").hidden = false;
-            let resultHolder = document.getElementById("result-holder");
-            resultHolder.replaceChildren();
+        let results = resultsQuery.results;
+        let totalCount = resultsQuery.totalCountPrimitive;
+        document.getElementById("search-container").hidden = false;
+        let resultHolder = document.getElementById("result-holder");
+        resultHolder.replaceChildren();
 
-            for(let result of results) {
+        for (let result of results) {
+            let resultParent = document.createElement("div");
+            resultParent.classList.add("element-item");
+            resultParent.classList.add(elementItemSetting);
+            resultParent.addEventListener("click", () => {
+                window.location = `${falsehoodServiceUrl}/Falsehood/${result.id}`;
+            });
+            resultHolder.appendChild(resultParent);
 
-                let resultParent = document.createElement("div");
-                resultParent.classList.add("element-item");
-                resultParent.classList.add(elementItemSetting);
-                resultParent.addEventListener("click", () => {
+            let titleDiv = document.createElement("div");
+            titleDiv.classList.add("flex-and-center");
+            titleDiv.textContent = result.title;
+            resultParent.appendChild(titleDiv);
 
-                    window.location = `${url}/Falsehood/${result.id}`;
+            resultParent.appendChild(document.createElement("hr"));
 
-                });
+            let detailsDiv = document.createElement("div");
+            detailsDiv.style.gap = "5px";
+            detailsDiv.style.flexFlow = "row wrap";
+            resultParent.appendChild(detailsDiv);
 
-                resultHolder.appendChild(resultParent);
+            let pElement = document.createElement("p");
+            pElement.innerHTML = `<b>Submitted By: </b>${result.authorDisplayName}`;
+            detailsDiv.appendChild(pElement);
 
-                let titleDiv = document.createElement("div");
-                titleDiv.classList.add("flex-and-center");
-                titleDiv.textContent = result.title;
-                resultParent.appendChild(titleDiv);
+            pElement = document.createElement("p");
+            pElement.innerHTML = `<b>Date: </b>${result.dateMade}`;
+            detailsDiv.appendChild(pElement);
 
-                resultParent.appendChild(document.createElement("hr"));
+            pElement = document.createElement("p");
+            pElement.innerHTML = `<b>Severity: </b>${result.severity}`;
+            detailsDiv.appendChild(pElement);
 
-                let detailsDiv = document.createElement("div");
-                detailsDiv.style.gap = "5px";
-                detailsDiv.style.flexFlow = "row wrap";
-                resultParent.appendChild(detailsDiv);
+            pElement = document.createElement("p");
+            pElement.innerHTML = `<b>Status: </b>${result.status}`;
+            detailsDiv.appendChild(pElement);
 
-                let pElement = document.createElement("p");
-                pElement.innerHTML = `<b>Submitted By: </b>${result.authorDisplayName}`;
-                detailsDiv.appendChild(pElement);
-
-                pElement = document.createElement("p");
-                pElement.innerHTML = `<b>Date: </b>${result.dateMade}`;
-                detailsDiv.appendChild(pElement);
-
-                pElement = document.createElement("p");
-                pElement.innerHTML = `<b>Severity: </b>${result.severity}`;
-                detailsDiv.appendChild(pElement);
-
-                pElement = document.createElement("p");
-                pElement.innerHTML = `<b>Status: </b>${result.status}`;
-                detailsDiv.appendChild(pElement);
-
-                if(result.culprits){
-                    let divBrands = document.createElement("div");
-                    divBrands.style.padding = "5px";
-                    divBrands.style.width = "100%";
-
-                    let b = document.createElement("b");
-                    b.textContent = "Culprits:";
-                    divBrands.appendChild(b);
-
-                    let first = true;
-
-                    for(let culprit of result.culprits) {
-                        let sp = document.createElement("span");
-                        sp.textContent = first ? `${culprit.brand.names[0]}` : `, ${culprit.brand.names[0]}`;
-                        first = false;
-                        divBrands.appendChild(sp);
-                    }
-                    detailsDiv.appendChild(divBrands);
+            if (result.culprits) {
+                let divBrands = document.createElement("div");
+                divBrands.style.padding = "5px";
+                divBrands.style.width = "100%";
+                let b = document.createElement("b");
+                b.textContent = "Culprits:";
+                divBrands.appendChild(b);
+                let first = true;
+                for (let culprit of result.culprits) {
+                    let sp = document.createElement("span");
+                    sp.textContent = first ? `${culprit.brand.names[0]}` : `, ${culprit.brand.names[0]}`;
+                    first = false;
+                    divBrands.appendChild(sp);
                 }
-
-                if(result.targets){
-                    let divBrands = document.createElement("div");
-                    divBrands.style.padding = "5px";
-                    divBrands.style.width = "100%";
-
-                    let b = document.createElement("b");
-                    b.textContent = "Targets:";
-                    divBrands.appendChild(b);
-
-                    let first = true;
-
-                    for(let target of result.targets) {
-                        let sp = document.createElement("span");
-                        sp.textContent = first ? `${target.brand.names[0]}` : `, ${target.brand.names[0]}`;
-                        first = false;
-                        divBrands.appendChild(sp);
-                    }
-                    detailsDiv.appendChild(divBrands);
-                }
-
-
+                detailsDiv.appendChild(divBrands);
             }
 
-            document.getElementById("back-button").disabled = page <= 0;
-            document.getElementById("page-p").textContent = `Page: ${page}`;
-            document.getElementById("forward-button").disabled = size > results.length;
-            document.getElementById("showing-p").textContent = `Showing ${ (size * page) + 1} - ${ Math.min(size * (page + 1), totalCount) }  of ${totalCount} Falsehoods`;
+            if (result.targets) {
+                let divBrands = document.createElement("div");
+                divBrands.style.padding = "5px";
+                divBrands.style.width = "100%";
+                let b = document.createElement("b");
+                b.textContent = "Targets:";
+                divBrands.appendChild(b);
+                let first = true;
+                for (let target of result.targets) {
+                    let sp = document.createElement("span");
+                    sp.textContent = first ? `${target.brand.names[0]}` : `, ${target.brand.names[0]}`;
+                    first = false;
+                    divBrands.appendChild(sp);
+                }
+                detailsDiv.appendChild(divBrands);
+            }
+        }
+
+        document.getElementById("back-button").disabled = page <= 0;
+        document.getElementById("page-p").textContent = `Page: ${page}`;
+        document.getElementById("forward-button").disabled = size > results.length;
+        document.getElementById("showing-p").textContent = `Showing ${(size * page) + 1} - ${Math.min(size * (page + 1), totalCount)} of ${totalCount} Falsehoods`;
     }
 
     var page = 0;
@@ -255,13 +239,22 @@
     var searchObject;
     var status;
 
-    function performSearch() {
+    // Elements currently highlighted as "active" during a search
+    var activeElements = [];
 
+    function clearActiveElements() {
+        for (let el of activeElements) {
+            el.classList.remove("button-dis");
+        }
+        activeElements = [];
+    }
+
+    function performSearch() {
         const url = new URL(`${falsehoodServiceUrl}/falsehood-search-api`);
         const params = { page, size };
-
-        params["status"] = status;
-        // Automatically handles encoding and '?' or '&' symbols
+        if (status) {
+            params["status"] = status;
+        }
         url.search = new URLSearchParams(params).toString();
 
         fetch(url, {
@@ -274,61 +267,136 @@
             let results = await response.json();
             parseResults(results);
         }).finally(() => {
+            clearActiveElements();
             isSearching = false;
         });
     }
 
     var isSearching = false;
-    function prepSearch(useCulprits, newStatus){
 
-        if(isSearching){
+    /**
+     * @param {boolean} useCulprits - true = brand is culprit, false = brand is target
+     * @param {string|null} newStatus - falsehood status filter (e.g. "ACCEPTED", "CONFIRMED"), or null for any
+     * @param {string|null} severity - severity filter, or null for any
+     * @param {Element[]} elementsToHighlight - table cells/rows to apply button-dis to during search
+     */
+    function prepSearch(useCulprits, newStatus, severity, elementsToHighlight) {
+        if (isSearching) {
             return;
         }
         isSearching = true;
 
-        if(useCulprits){
-            searchObject = {
-                culprit: brandId
-            }
-        } else {
-            searchObject = {
-                target: brandId
-            }
+        // Highlight the clicked elements
+        activeElements = elementsToHighlight || [];
+        for (let el of activeElements) {
+            el.classList.add("button-dis");
         }
-        status = newStatus;
+
+        searchObject = useCulprits
+            ? { culprit: brandId }
+            : { target: brandId };
+
+        if (severity) {
+            searchObject.severity = severity;
+        }
+
+        status = newStatus || null;
+        page = 0;
         performSearch();
     }
 
-    function onSwitchPage(forward, button) {
-        if(forward) {
+    function onSwitchPage(forward) {
+        if (forward) {
             page++;
         } else {
             page--;
         }
-        performSearch(button);
+        performSearch();
     }
 
-    document.addEventListener('DOMContentLoaded', (event) => {
-            document.getElementById("back-button").addEventListener("click", (e) => {
-                onSwitchPage(false, e.target);
-            });
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById("back-button").addEventListener("click", () => {
+            onSwitchPage(false);
+        });
+        document.getElementById("forward-button").addEventListener("click", () => {
+            onSwitchPage(true);
+        });
 
-            document.getElementById("forward-button").addEventListener("click", (e) => {
-                onSwitchPage(true, e.target);
-            });
+        // Header sub-column clicks: filter by status only (both culprit columns)
+        document.getElementById("culprit-accept-col").addEventListener("click", () => {
+            if (isSearching) return;
+            const cols = Array.from(document.querySelectorAll(
+                '#falsehood-count-table tbody .count-cell[data-culprit="true"][data-status="ACCEPTED"]'
+            ));
+            prepSearch(true, "ACCEPTED", null, cols);
+        });
+        document.getElementById("culprit-confirm-col").addEventListener("click", () => {
+            if (isSearching) return;
+            const cols = Array.from(document.querySelectorAll(
+                '#falsehood-count-table tbody .count-cell[data-culprit="true"][data-status="CONFIRMED"]'
+            ));
+            prepSearch(true, "CONFIRMED", null, cols);
+        });
+        document.getElementById("target-accept-col").addEventListener("click", () => {
+            if (isSearching) return;
+            const cols = Array.from(document.querySelectorAll(
+                '#falsehood-count-table tbody .count-cell[data-culprit="false"][data-status="ACCEPTED"]'
+            ));
+            prepSearch(false, "ACCEPTED", null, cols);
+        });
+        document.getElementById("target-confirm-col").addEventListener("click", () => {
+            if (isSearching) return;
+            const cols = Array.from(document.querySelectorAll(
+                '#falsehood-count-table tbody .count-cell[data-culprit="false"][data-status="CONFIRMED"]'
+            ));
+            prepSearch(false, "CONFIRMED", null, cols);
+        });
 
-            document.getElementById("culprit-accept-col").addEventListener("click", () => {
-                prepSearch(true, "ACCEPTED");
+        // "Culprit" spanning header: search all culprit falsehoods (both statuses)
+        document.getElementById("culprit-header").addEventListener("click", () => {
+            if (isSearching) return;
+            const cols = Array.from(document.querySelectorAll(
+                '#falsehood-count-table tbody .count-cell[data-culprit="true"]'
+            ));
+            prepSearch(true, null, null, cols);
+        });
+
+        // "Target" spanning header: search all target falsehoods (both statuses)
+        document.getElementById("target-header").addEventListener("click", () => {
+            if (isSearching) return;
+            const cols = Array.from(document.querySelectorAll(
+                '#falsehood-count-table tbody .count-cell[data-culprit="false"]'
+            ));
+            prepSearch(false, null, null, cols);
+        });
+
+        // Severity (first-column) cell clicks: search all statuses for that severity
+        document.querySelectorAll('#falsehood-count-table tbody .severity-cell').forEach(cell => {
+            cell.addEventListener("click", () => {
+                if (isSearching) return;
+                const row = cell.closest("tr");
+                const severity = row.dataset.severity;
+                // Highlight the whole row (all tds in this row)
+                const rowCells = Array.from(row.querySelectorAll("td"));
+                // Determine which side is culprit vs target by checking the count cells —
+                // since we can't know which side, search all falsehoods for this brand + severity.
+                // We search as culprit=brandId with severity filter (no status filter).
+                // Use all row cells as the highlight target.
+                prepSearch(true, null, severity, rowCells);
             });
-            document.getElementById("culprit-confirm-col").addEventListener("click", () => {
-                prepSearch(true, "CONFIRMED");
+        });
+
+        // Individual count cell clicks: filter by exact culprit/target + status + severity
+        document.querySelectorAll('#falsehood-count-table tbody .count-cell').forEach(cell => {
+            cell.addEventListener("click", () => {
+                if (isSearching) return;
+                const row = cell.closest("tr");
+                const severity = row.dataset.severity;
+                const useCulprits = cell.dataset.culprit === "true";
+                const cellStatus = cell.dataset.status;
+                prepSearch(useCulprits, cellStatus, severity, [cell]);
             });
-            document.getElementById("target-accept-col").addEventListener("click", () => {
-                prepSearch(false, "ACCEPTED");
-            });
-            document.getElementById("target-confirm-col").addEventListener("click", () => {
-                prepSearch(false, "CONFIRMED");
-            });
+        });
     });
 </script>
 

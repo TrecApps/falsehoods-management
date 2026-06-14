@@ -207,3 +207,70 @@ input:disabled+label {
     padding: 10px;
     background-color: #ccc;
 }
+
+/* Modern interactive table styles for falsehood count table */
+#falsehood-count-table {
+    border-collapse: collapse;
+    font-family: Arial, Helvetica, sans-serif;
+    width: 95%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+#falsehood-count-table thead tr:first-child th {
+    background-color: #4a6fa5;
+    color: #fff;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+}
+
+#falsehood-count-table thead tr:last-child th {
+    background-color: #6b8cba;
+    color: #fff;
+    font-size: 0.88rem;
+}
+
+#falsehood-count-table thead th[id]:hover {
+    background-color: #3a5a8a;
+    transition: background-color 0.2s;
+}
+
+#falsehood-count-table tbody tr:nth-child(even) {
+    background-color: #f0f4fa;
+}
+
+#falsehood-count-table tbody tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+#falsehood-count-table tbody tr:hover {
+    background-color: #dce8f5;
+    transition: background-color 0.15s;
+}
+
+#falsehood-count-table .severity-cell {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+#falsehood-count-table .severity-cell:hover {
+    background-color: #b8d0ed;
+    transition: background-color 0.15s;
+}
+
+#falsehood-count-table .count-cell {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+#falsehood-count-table .count-cell:hover {
+    background-color: #a8c8e8;
+    transition: background-color 0.15s;
+}
+
+#falsehood-count-table td,
+#falsehood-count-table th {
+    border: 1px solid #b0bec5;
+    padding: 8px 12px;
+}
