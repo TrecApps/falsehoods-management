@@ -186,6 +186,9 @@ public class SecondReviewService {
                         Record newRecord = new Record();
                         newRecord.setId(UUID.randomUUID());
                         newRecord.setResourceId(id);
+                        newRecord.setCreator(accountList.getMainAccount().getId());
+                        newRecord.setUCreator(accountList.getMainUserAccount().getId());
+                        newRecord.setDisplayName(accountList.getMainAccount().getDisplayName());
                         newRecord.setMade(Instant.now().plusNanos(10));
                         newRecord.setType(CONFIRMED.toString());
                         updateRecords.add(newRecord);
@@ -199,6 +202,9 @@ public class SecondReviewService {
                         Record newRecord = new Record();
                         newRecord.setId(UUID.randomUUID());
                         newRecord.setResourceId(id);
+                        newRecord.setCreator(accountList.getMainAccount().getId());
+                        newRecord.setUCreator(accountList.getMainUserAccount().getId());
+                        newRecord.setDisplayName(accountList.getMainAccount().getDisplayName());
                         newRecord.setMade(Instant.now().plusNanos(10));
                         newRecord.setType(DENIED.toString());
                         updateRecords.add(newRecord);
@@ -298,6 +304,7 @@ public class SecondReviewService {
                     newRecord.setId(UUID.randomUUID());
                     newRecord.setCreator(accountList.getMainAccount().getId());
                     newRecord.setUCreator(accountList.getMainUserAccount().getId());
+                    newRecord.setDisplayName(accountList.getMainAccount().getDisplayName());
                     newRecord.setMade(Instant.now());
                     newRecord.setType(APPEAL_2.toString());
                     newRecord.setMessages(List.of(comment));

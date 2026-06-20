@@ -115,8 +115,9 @@ public class FalsehoodPrepareService {
 
                     record.setMessages(List.of("Submitted Falsehood"));
                     record.setType("SUBMITTED");
-                    record.setUCreator(accountList.getMainUserAccount().getId());
                     record.setCreator(accountList.getMainAccount().getId());
+                    record.setUCreator(accountList.getMainUserAccount().getId());
+                    record.setDisplayName(accountList.getMainAccount().getDisplayName());
 
                     record.setMade(Instant.now());
 
@@ -173,8 +174,9 @@ public class FalsehoodPrepareService {
 
                                 Record createRecord = new Record();
                                 createRecord.setId(UUID.randomUUID());
-                                createRecord.setCreator(metadata.getCreator());
-                                createRecord.setUCreator(metadata.getUCreator());
+                                createRecord.setCreator(accountList.getMainAccount().getId());
+                                createRecord.setUCreator(accountList.getMainUserAccount().getId());
+                                createRecord.setDisplayName(accountList.getMainAccount().getDisplayName());
 //                                createRecord.set(metadata.getAuthorDisplayName());
                                 createRecord.setType("CREATED");
                                 createRecord.setMade(Instant.now());
@@ -405,9 +407,10 @@ public class FalsehoodPrepareService {
                     Record deleteRecord = new Record();
                     deleteRecord.setId(UUID.randomUUID());
                     deleteRecord.setMade(Instant.now());
-                    deleteRecord.setUCreator(accountList.getMainUserAccount().getId());
-                    deleteRecord.setResourceId(f.getId());
                     deleteRecord.setCreator(accountList.getMainAccount().getId());
+                    deleteRecord.setUCreator(accountList.getMainUserAccount().getId());
+                    deleteRecord.setDisplayName(accountList.getMainAccount().getDisplayName());
+                    deleteRecord.setResourceId(f.getId());
                     deleteRecord.setType("DELETED");
                     f.getRecords().add(deleteRecord);
                     return mongoRepo.saveFalsehood(f)

@@ -37,6 +37,7 @@ public class FalsehoodRecord extends Record {
         ret.setMade(this.getMade());
         ret.setMessages(this.getMessages());
         ret.setId(this.id);
+        ret.setDisplayName(this.getDisplayName());
 
         return ret;
     }
@@ -51,6 +52,7 @@ public class FalsehoodRecord extends Record {
         ret.setMade(record.getMade());
         ret.setMessages(record.getMessages());
         ret.setId(record.getId());
+        ret.setDisplayName(record.getDisplayName());
 
         return ret;
     }

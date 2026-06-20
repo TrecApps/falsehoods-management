@@ -84,6 +84,7 @@ public class FirstReviewService {
                     record.setId(UUID.randomUUID());
                     record.setCreator(accountList.getMainAccount().getId());
                     record.setUCreator(accountList.getMainUserAccount().getId());
+                    record.setDisplayName(accountList.getMainAccount().getDisplayName());
                     record.setResourceId(id);
                     record.setMade(Instant.now());
                     record.setMessages(List.of(comment));
@@ -157,6 +158,7 @@ public class FirstReviewService {
                         newRecord.setResourceId(id);
                         newRecord.setMade(Instant.now().plusNanos(10));
                         newRecord.setType("REJECTED");
+
                         updateRecords.add(newRecord);
 
                         if(penalize/(double)reject > 0.5)
@@ -255,6 +257,7 @@ public class FirstReviewService {
                     newRecord.setId(UUID.randomUUID());
                     newRecord.setCreator(accountList.getMainAccount().getId());
                     newRecord.setUCreator(accountList.getMainUserAccount().getId());
+                    newRecord.setDisplayName(accountList.getMainAccount().getDisplayName());
                     newRecord.setMade(Instant.now());
                     newRecord.setType(APPEAL_1.toString());
                     newRecord.setMessages(List.of(comment));
