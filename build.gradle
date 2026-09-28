@@ -8,7 +8,7 @@ plugins {
 
 dependencyManagement {
     imports {
-        mavenBom("com.azure.spring:spring-cloud-azure-dependencies:7.0.0")
+        mavenBom("com.azure.spring:spring-cloud-azure-dependencies:7.4.0")
     }
 }
 
@@ -43,9 +43,11 @@ dependencies {
 
     implementation 'net.coobird:thumbnailator:0.4.21'
 
+    
+
     // Basic Security help
-    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-azure', version: '0.0.64')
-    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-mongo', version: '0.0.64')
+    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-azure', version: '0.0.66')
+    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-mongo', version: '0.0.66')
 
     // Security Dependencies
     implementation "org.springframework.boot:spring-boot-starter-security"
