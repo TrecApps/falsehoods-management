@@ -38,12 +38,12 @@ jar{
 }
 
 dependencies {
-    implementation 'org.projectlombok:lombok:1.18.42'
-    annotationProcessor 'org.projectlombok:lombok:1.18.42'
+    implementation 'org.projectlombok:lombok:1.18.48'
+    annotationProcessor 'org.projectlombok:lombok:1.18.48'
 
     implementation 'net.coobird:thumbnailator:0.4.21'
 
-    
+    implementation 'com.trecapps:notification-base:0.0.19'
 
     // Basic Security help
     implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-azure', version: '0.0.66')
