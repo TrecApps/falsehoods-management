@@ -1,9 +1,11 @@
 package com.trecapps.falsehoods.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.trecauth.common.model.Resource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
@@ -76,6 +78,13 @@ public class FalsehoodDocument extends Resource {
      */
     @Indexed
     List<UUID> targets = new ArrayList<>();
+
+    /**
+     * Used to store an id from a record in the middle of request processing, not to be persisted
+     */
+    @Transient
+    @JsonIgnore
+    transient UUID suggestId;
 
     /**
      * Stage the Falsehood entry is currently in

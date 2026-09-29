@@ -1,6 +1,7 @@
 package com.trecapps.falsehoods.services;
 
 import com.trecapps.falsehoods.models.*;
+import com.trecapps.falsehoods.notify.NotifyService;
 import com.trecauth.common.model.Account;
 import com.trecauth.common.model.AccountList;
 import com.trecauth.common.model.Record;
@@ -49,6 +50,9 @@ public class SecondReviewService {
 
     @Autowired
     AccountReactiveRepository accountRepo;
+
+    @Autowired(required = false)
+    NotifyService notifyService;
 
     void updateCredibility(UserAccount user, int pointChange){
         user.setCredibility(user.getCredibility().add(BigInteger.valueOf(pointChange)));
@@ -128,6 +132,8 @@ public class SecondReviewService {
                     record.setMessages(List.of(comment));
 
                     record.setType(action.toString());
+
+                    falsehood.setSuggestId(record.getId());
 
                     if (action == DENY) {
                         if (removePoints > 0)
@@ -223,14 +229,13 @@ public class SecondReviewService {
                             .collectList().thenReturn(falsehood);
                 })
                 .flatMap((FalsehoodDocument f) -> {
-                    if(action.equals(SUGGEST) || f.getStatus().equals(FalsehoodStage.REJECTED) || f.getStatus().equals(FalsehoodStage.ACCEPTED)){
-                        //notify(f, action);
-                    }
-
                     f.setRecords(
                             f.getRecords().stream().filter((Record r) -> r.getId() == null).sorted().toList()
                     );
 
+                    if(notifyService != null && (f.getStatus().equals(FalsehoodStage.DENIED) || f.getStatus().equals(FalsehoodStage.CONFIRMED))){
+                        notifyService.notifyOnReview(f, action);
+                    }
                     return mongoRepo.saveFalsehood(f).thenReturn(ResponseObj.getInstance200("Success!"));
                 });
 

@@ -1,6 +1,7 @@
 package com.trecapps.falsehoods.services;
 
 import com.trecapps.falsehoods.models.*;
+import com.trecapps.falsehoods.notify.NotifyService;
 import com.trecauth.common.model.AccountList;
 import com.trecauth.common.model.Record;
 import com.trecauth.common.model.UserAccount;
@@ -26,8 +27,8 @@ public class FirstReviewService {
     @Autowired
     MongoRepo mongoRepo;
 
-    //@Autowired
-
+    @Autowired
+    NotifyService notifyService;
 
     @Value("${trecapps.falsehoods.self-review:false}")
     boolean allowSelfReview;
@@ -90,9 +91,7 @@ public class FirstReviewService {
                     record.setMessages(List.of(comment));
 
                     record.setType(action.toString());
-
-
-
+                    falsehood.setSuggestId(record.getId());
 
                     // Update the needed Records
                     for(Record prevRecord: recordList){
@@ -173,16 +172,12 @@ public class FirstReviewService {
 
                 })
                 .flatMap((FalsehoodDocument f) -> {
-//                    if(action.equals(SUGGEST) || f.getStatus().equals(FalsehoodStage.REJECTED) || f.getStatus().equals(FalsehoodStage.ACCEPTED)){
-//                        //notify(f, action);
-//                    }
-
-//                    SortedSet<Record> records = new TreeSet<>(f.getRecords());
-//                    records.
-//
-//                    f.setRecords(
-//                            f.getRecords().stream().filter((Record r) -> r.getId() == null).sorted().toList()
-//                    );
+                    f.setRecords(
+                            f.getRecords().stream().filter((Record r) -> r.getId() == null).sorted().toList()
+                    );
+                    if(action.equals(SUGGEST) || f.getStatus().equals(FalsehoodStage.REJECTED) || f.getStatus().equals(FalsehoodStage.ACCEPTED)){
+                        notifyService.notifyOnReview(f, action);
+                    }
 
                     return mongoRepo.saveFalsehood(f).thenReturn(ResponseObj.getInstance200("Success!"));
                 });

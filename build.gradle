@@ -63,6 +63,8 @@ dependencies {
     implementation "com.microsoft.azure:applicationinsights-runtime-attach:3.7.6"
     implementation "com.azure.spring:spring-cloud-azure-starter-keyvault"
     implementation 'com.azure:azure-storage-blob'
+    implementation 'com.azure:azure-messaging-servicebus'
+    implementation 'com.azure:azure-identity'
 
     // Source: https://mvnrepository.com/artifact/ognl/ognl
 //    implementation 'ognl:ognl:3.4.11'
@@ -72,7 +74,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'net.jqwik:jqwik:1.8.5'
     testImplementation 'org.mockito:mockito-core:5.11.0'
-    testImplementation 'org.assertj:assertj-core:3.25.3'
+    testImplementation 'org.assertj:assertj-core:3.27.7'
 }
 
 test {
