@@ -1,6 +1,7 @@
 package com.trecapps.falsehoods.services;
 
 import com.trecapps.falsehoods.models.*;
+import com.trecapps.falsehoods.notify.NotifyService;
 import com.trecauth.common.model.AccountList;
 import com.trecauth.common.model.Record;
 import jakarta.validation.constraints.NotNull;
@@ -29,6 +30,9 @@ public class FalsehoodPrepareService {
 
     @Autowired
     IObjectStorageService storageService;
+
+    @Autowired(required = false)
+    NotifyService notifyService;
 
     private static final List<String> employeePatchFields = List.of(
             "culprits",
@@ -350,17 +354,30 @@ public class FalsehoodPrepareService {
 
                     // End ToDo
 
+                    Set<Record> records = new HashSet<>();
 
                     if(!FalsehoodStage.ACCEPTED.equals(falsehood.getStatus())) {
                         for (Record record : falsehood.getRecords()) {
-                            if ("ACCEPT".equals(record.getType()))
+                            if ("ACCEPT".equals(record.getType())) {
                                 record.setType("ACCEPT_OUT");
-                            else if("REJECT".equals(record.getType()))
+                                records.add(record);
+                            }
+                            else if("REJECT".equals(record.getType())){
                                 record.setType("REJECT_OUT");
+                                records.add(record);
+                            } else if("SUGGEST".equals(record.getType())){
+                                records.add(record);
+                            }
                         }
                     }
 
                     return mongoRepo.saveFalsehood(falsehood)
+                            .doOnNext((FalsehoodDocument document) -> {
+                                if(this.notifyService != null)
+                                {
+                                    this.notifyService.notifyOnEdit(records, document);
+                                }
+                            })
                             .thenReturn(ResponseObj.getInstance200("Success!"));
 
                 }).onErrorResume(ResponseStatusException.class, (ResponseStatusException ex) -> Mono.just(ex.toResponse()));

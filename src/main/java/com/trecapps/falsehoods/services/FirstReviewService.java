@@ -175,7 +175,7 @@ public class FirstReviewService {
                     f.setRecords(
                             f.getRecords().stream().filter((Record r) -> r.getId() == null).sorted().toList()
                     );
-                    if(action.equals(SUGGEST) || f.getStatus().equals(FalsehoodStage.REJECTED) || f.getStatus().equals(FalsehoodStage.ACCEPTED)){
+                    if(notifyService != null && (action.equals(SUGGEST) || f.getStatus().equals(FalsehoodStage.REJECTED) || f.getStatus().equals(FalsehoodStage.ACCEPTED))){
                         notifyService.notifyOnReview(f, action);
                     }
 
