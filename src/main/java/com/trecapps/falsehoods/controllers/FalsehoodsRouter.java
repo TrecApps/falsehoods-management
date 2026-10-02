@@ -39,6 +39,8 @@ public class FalsehoodsRouter extends BaseRouter{
     String falsehoodsPath;
     @Value("${trecapps.login.url}")
     String loginUrl;
+    @Value("${trecapps.notify.url}")
+    String notifyUrl;
 
     @Autowired
     BriefService briefService;
@@ -200,6 +202,7 @@ public class FalsehoodsRouter extends BaseRouter{
             dataMap.put("isAccepted", fRet.getStatus() == FalsehoodStage.ACCEPTED);
             dataMap.put("canAddBrief", list != null && briefService.canLeaveBrief(fRet, list));
             dataMap.put("blankString", "");
+            dataMap.put("notifyUrl", notifyUrl);
             List<String> reviewOptions = new ArrayList<>();
             if(fRet.getStatus() == FalsehoodStage.SUBMITTED){
                 reviewOptions.add("approve");

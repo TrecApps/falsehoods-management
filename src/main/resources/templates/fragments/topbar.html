@@ -183,6 +183,15 @@
 
         });
 
+        function onNotifyClick(){
+            showPopup('notificationsPopup');
+            updateNotificationsContainerElement();
+        }
+
+        function onNotifyHover(hovering) {
+            document.getElementById('notification-icon').src = `images/icons/${hovering ? 'w' : 'b'}-bell.png`;
+        }
+
         function updateStyle(e) {
 
             e.target.disabled = true;
@@ -281,6 +290,19 @@
 <!--            }-->
 <!--        </div>-->
 
+        <div class="icon-section">
+            <div th:if="${list != null}" class="icon-holder"
+                 onclick="onNotifyClick()"
+                 onmouseenter="onNotifyHover(true)"
+                 onmouseleave="onNotifyHover(false)"
+            >
+                <div class="element-item" id="notification-counter" hidden>
+                    <p id="notification-counter-p"></p>
+                </div>
+                <img id="notification-icon" src="images/icons/w-bell.png" alt="notify">
+            </div>
+        </div>
+
         <div
             th:if="${list != null}"
             class="profile-section"
@@ -333,63 +355,7 @@
 
     </div>
 
-<!--    @if (authService.hasActiveTokens() && items.length) {-->
-<!--    <div #profilePanel-->
-<!--         class="profile-panel"-->
-<!--         appElementContainer-->
-<!--         hidden-->
-<!--    >-->
-<!--        @for (itemGroup of items; track itemGroup; let i = $index) {-->
-<!--        <div-->
-<!--        >-->
-<!--            @if (i != 0) {-->
-<!--            <hr>-->
-<!--            }-->
-<!--            @for (item of itemGroup.itemList | navProfile; track item) {-->
-<!--            <div-->
-<!--                    appElementItem-->
-<!--                    (click)="onProfileItemClicked.emit(item.item)"-->
-<!--            >-->
-<!--                <p>{{ item.displayItem }}</p>-->
-<!--            </div>-->
-<!--            }-->
-<!--        </div>-->
-<!--        }-->
-<!--    </div>-->
-<!--    }-->
 
-<!--    @if (authService.ownedAccounts?.length) {-->
-<!--    <div #brandPanel-->
-<!--         class="profile-panel"-->
-<!--         appElementContainer-->
-<!--         hidden-->
-<!--    >-->
-<!--        @for (brand of authService.ownedAccounts; track brand) {-->
-<!--        <div appElementItem class="brand-container">-->
-<!--            <div class="brand-left-side">-->
-<!--                <img [src]="basicImageUrl + formatBrandId(brand.id || '')" (error)="imageError($event)">-->
-<!--            </div>-->
-<!--            <div class="brand-right-side">-->
-<!--                <p style="text-align: center;">{{ brand.name }}</p>-->
-<!--                <div class="brand-right-buttons">-->
-<!--                    <div class="brand-right-button" appElementItem>-->
-<!--                        <a [href]="baseUserUrl + '/brands'" target="_blank">-->
-<!--                            <div style="border: 1px rgba(128, 128, 128, 0.4) solid;" >-->
-<!--                                View Brand-->
-<!--                            </div>-->
-<!--                        </a>-->
-<!--                    </div>-->
-<!--                    <div class="brand-right-button" appElementItem >-->
-<!--                        <div style="border: 1px rgba(128, 128, 128, 0.4) solid;" (click)="loginAsBrand(brand.id)">-->
-<!--                            {{ authService.tcBrand?.id == brand.id ? 'Active Brand' : 'Assume Brand'}}-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        }-->
-<!--    </div>-->
-<!--    }-->
 
 </div>
 
@@ -449,7 +415,13 @@
 
     </div>
 
-    <script>
+    <div th:replace="~{fragments/popup :: popup('notificationsPopup', 50, 'Notifications', ~{::notifyBody})}">
+        <div  th:ref="notifyBody" id="notification-container" class="element-container">
+
+        </div>
+    </div>
+
+    <script th:inline="javascript">
         const brandOnButton = document.getElementById("set-search-on");
         const brandOffButton = document.getElementById("set-search-off");
         const searchHolder = document.getElementById("search-holder");
@@ -471,6 +443,23 @@
             window.addEventListener("click", (e) => {
                 toggleProfilePanel(e, true);
             });
+
+            // Prepare Notifications
+            const notifyUserList = [[${list}]]
+            if(notifyUserList){
+                let notifyUrl = [[${ notifyUrl }]]
+                prepareNotificationPolling(notifyUrl, (count) => {
+
+                    document.getElementById('notification-counter').hidden = (count == 0);
+                    document.getElementById('notification-counter-p').textContent = count;
+
+                });
+
+
+            }
+
+
+
 
         });
 

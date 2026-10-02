@@ -50,6 +50,8 @@ public class BrandsRouter extends BaseRouter{
     String falsehoodsPath;
     @Value("${trecapps.login.url}")
     String loginUrl;
+    @Value("${trecapps.notify.url}")
+    String notifyUrl;
 
 
     String convertObjectToString(Object o){
@@ -70,6 +72,7 @@ public class BrandsRouter extends BaseRouter{
         dataMap.put("falsehoodServiceUrl", falsehoodsUrl);
         dataMap.put("userServiceUrl", loginUrl);
         dataMap.put("baseUrl", falsehoodsPath);
+        dataMap.put("notifyUrl", notifyUrl);
         dataMap.put("isResourceEmployee", list != null && list.getMainAccount().getPermissions().contains("RESOURCE_EMPLOYEE"));
         if(list != null){
             String profilePic = String.format("%s/Images/profile/%s", this.imageUrl, list.getMainAccount().getId());
