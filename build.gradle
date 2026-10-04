@@ -1,9 +1,9 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '4.0.8'
+    id 'org.springframework.boot' version '4.1.1'
     id 'jacoco'
 
-    id "io.spring.dependency-management" version "1.1.0"
+    id "io.spring.dependency-management" version "1.1.7"
 }
 
 dependencyManagement {
@@ -46,8 +46,8 @@ dependencies {
     implementation 'com.trecapps:notification-base:0.0.19'
 
     // Basic Security help
-    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-azure', version: '0.0.66')
-    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-mongo', version: '0.0.66')
+    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-azure', version: '0.0.67')
+    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-mongo', version: '0.0.67')
 
     // Security Dependencies
     implementation "org.springframework.boot:spring-boot-starter-security"
