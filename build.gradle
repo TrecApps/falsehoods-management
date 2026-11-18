@@ -46,8 +46,8 @@ dependencies {
     implementation 'com.trecapps:notification-base:0.0.19'
 
     // Basic Security help
-    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-azure', version: '0.0.67')
-    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-mongo', version: '0.0.67')
+    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-azure', version: '0.0.68')
+    implementation(group: 'com.trecapps.trecauth', name: 'trec-auth-mongo', version: '0.0.68')
 
     // Security Dependencies
     implementation "org.springframework.boot:spring-boot-starter-security"
